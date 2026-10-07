@@ -6,6 +6,7 @@ import {
   Group,
   Pagination,
   Stack,
+  Button,
   Text,
   TextInput,
 } from '@mantine/core';
@@ -70,7 +71,7 @@ const status = (expiry: string) => {
 export default function MemberList() {
   const [page, setPage] = useState(1);
   const [openId, setOpenId] = useState<string | null>(null);
-  
+
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(query, 300);
 
@@ -80,7 +81,7 @@ export default function MemberList() {
   const sorted = [...filtered].sort((a, b) =>
     a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
   );
-  
+
   const pages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const visible = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
@@ -92,6 +93,10 @@ export default function MemberList() {
   const onSearch = (value: string) => {
     setQuery(value);
     goTo(1);
+  };
+
+  const handleRenew = (m: Member) => {
+    console.log('Renew', m.name); // real logic comes later
   };
 
   return (
@@ -118,14 +123,24 @@ export default function MemberList() {
           const s = status(m.expiry);
           return (
             <Accordion.Item key={m.id} value={String(m.id)}>
-              <Accordion.Control>
-                <Group justify="space-between" wrap="nowrap" pr="xs">
-                  <Text fw={500}>{m.name}</Text>
-                  <Badge color={s.color} variant="light">
-                    {s.text}
-                  </Badge>
-                </Group>
-              </Accordion.Control>
+              <Group wrap="nowrap" gap={0} pr="xs">
+                <Accordion.Control style={{ flex: 1 }}>
+                  <Group justify="space-between" wrap="nowrap" pr="xs">
+                    <Text fw={500}>{m.name}</Text>
+                    <Badge color={s.color} variant="light">
+                      {s.text}
+                    </Badge>
+                  </Group>
+                </Accordion.Control>
+
+                <Button
+                  size="xs"
+                  style={{ flexShrink: 0 }}
+                  onClick={() => handleRenew(m)}
+                >
+                  Renew
+                </Button>
+              </Group>
 
               <Accordion.Panel>
                 <Stack gap={6}>
