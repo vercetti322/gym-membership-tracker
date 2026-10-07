@@ -1,6 +1,15 @@
-import './MemberList.css';
-
 import { useState } from 'react';
+import {
+  Accordion,
+  Anchor,
+  Badge,
+  Group,
+  Pagination,
+  Stack,
+  Text,
+  TextInput,
+} from '@mantine/core';
+import { useDebouncedValue } from '@mantine/hooks';
 
 type Member = {
   id: number;
@@ -34,75 +43,122 @@ const base: Member[] = [
   },
 ];
 
-const members: Member[] = Array.from({ length: 25 }, (_, i) => ({
+const members: Member[] = Array.from({ length: 10 }, (_, i) => ({
   ...base[i % 3],
   id: i + 1,
-  name: `${base[i % 3].name} ${i + 1}`, // makes each name distinct too
 }));
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 5;
+
+// ---------- days left ----------
+const daysLeft = (expiry: string) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const end = new Date(`${expiry}T00:00:00`);
+  return Math.round((end.getTime() - today.getTime()) / 86400000);
+};
+
+const status = (expiry: string) => {
+  const d = daysLeft(expiry);
+  if (d < 0) return { text: 'Expired', color: 'red' };
+  if (d === 0) return { text: 'Due today', color: 'yellow' };
+  if (d <= 7)
+    return { text: `${d} day${d === 1 ? '' : 's'} left`, color: 'yellow' };
+  return { text: `${d} days left`, color: 'green' };
+};
 
 export default function MemberList() {
   const [page, setPage] = useState(1);
-  const [openId, setOpenId] = useState<number | null>(null);
+  const [openId, setOpenId] = useState<string | null>(null);
+  
+  const [query, setQuery] = useState('');
+  const [debouncedQuery] = useDebouncedValue(query, 300);
 
-  const sorted = [...members].sort((a, b) =>
+  const q = debouncedQuery.trim().toLowerCase();
+  const filtered = members.filter((m) => m.name.toLowerCase().includes(q));
+
+  const sorted = [...filtered].sort((a, b) =>
     a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
   );
+  
   const pages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
   const visible = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   const goTo = (p: number) => {
     setPage(p);
-    setOpenId(null); // close any open bar when the page changes
+    setOpenId(null);
+  };
+
+  const onSearch = (value: string) => {
+    setQuery(value);
+    goTo(1);
   };
 
   return (
-    <div className="member-area">
-      {visible.map((m) => {
-        const open = openId === m.id;
-        return (
-          <div key={m.id} className="member">
-            <button
-              className="bar"
-              aria-expanded={open}
-              onClick={() => setOpenId(open ? null : m.id)}
-            >
-              <span>{m.name}</span>
-              <span className="chevron">{open ? '▲' : '▼'}</span>
-            </button>
+    <Stack w="100%" gap="sm" mih={560}>
+      <TextInput
+        placeholder="Search by name"
+        value={query}
+        onChange={(e) => onSearch(e.currentTarget.value)}
+      />
 
-            <div className={`details-wrap ${open ? 'open' : ''}`}>
-              <div className="details">
-                <div className="details-inner">
-                  <p>
-                    <strong>Phone:</strong>{' '}
-                    <a href={`tel:${m.phone.replace(/\s/g, '')}`}>{m.phone}</a>
-                  </p>
-                  <p>
-                    <strong>Plan:</strong> {m.plan}
-                  </p>
-                  <p>
-                    <strong>Expires:</strong> {m.expiry}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      })}
+      {visible.length === 0 && (
+        <Text ta="center" c="dimmed">
+          No members found
+        </Text>
+      )}
 
-      <div className="pager">
-        <button disabled={page <= 1} onClick={() => goTo(page - 1)}>
-          Prev
-        </button>
-        <span>
-          Page {page} of {pages}
-        </span>
-        <button disabled={page >= pages} onClick={() => goTo(page + 1)}>
-          Next
-        </button>
-      </div>
-    </div>
+      <Accordion
+        variant="separated"
+        radius="md"
+        value={openId}
+        onChange={setOpenId}
+      >
+        {visible.map((m) => {
+          const s = status(m.expiry);
+          return (
+            <Accordion.Item key={m.id} value={String(m.id)}>
+              <Accordion.Control>
+                <Group justify="space-between" wrap="nowrap" pr="xs">
+                  <Text fw={500}>{m.name}</Text>
+                  <Badge color={s.color} variant="light">
+                    {s.text}
+                  </Badge>
+                </Group>
+              </Accordion.Control>
+
+              <Accordion.Panel>
+                <Stack gap={6}>
+                  <Group gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Phone:
+                    </Text>
+                    <Anchor size="sm" href={`tel:${m.phone}`}>
+                      {m.phone}
+                    </Anchor>
+                  </Group>
+                  <Group gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Plan:
+                    </Text>
+                    <Text size="sm">{m.plan}</Text>
+                  </Group>
+                  <Group gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Expires:
+                    </Text>
+                    <Text size="sm">{m.expiry}</Text>
+                  </Group>
+                </Stack>
+              </Accordion.Panel>
+            </Accordion.Item>
+          );
+        })}
+      </Accordion>
+
+      <Group justify="center" mt="xs">
+        <Pagination total={pages} value={page} onChange={goTo} size="sm" />
+      </Group>
+    </Stack>
   );
 }
