@@ -9,6 +9,7 @@ import {
   Button,
   Text,
   TextInput,
+  Tooltip,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 
@@ -18,6 +19,8 @@ type Member = {
   phone: string;
   plan: string;
   expiry: string;
+  daysLeft: number;
+  paymentDone: boolean;
 };
 
 const base: Member[] = [
@@ -27,6 +30,8 @@ const base: Member[] = [
     phone: '9876543210',
     plan: '3 months',
     expiry: '2026-10-20',
+    daysLeft: 1,
+    paymentDone: true,
   },
   {
     id: 2,
@@ -34,6 +39,8 @@ const base: Member[] = [
     phone: '9812345678',
     plan: '1 month',
     expiry: '2026-11-02',
+    daysLeft: 0,
+    paymentDone: false,
   },
   {
     id: 3,
@@ -41,6 +48,8 @@ const base: Member[] = [
     phone: '9988776655',
     plan: '12 months',
     expiry: '2026-10-09',
+    daysLeft: -5,
+    paymentDone: false,
   },
 ];
 
@@ -49,26 +58,20 @@ const members: Member[] = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
 }));
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 7;
+const plural = (n: number) => (n === 1 ? 'day' : 'days');
 
-// ---------- days left ----------
-const daysLeft = (expiry: string) => {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const end = new Date(`${expiry}T00:00:00`);
-  return Math.round((end.getTime() - today.getTime()) / 86400000);
-};
-
-const status = (expiry: string) => {
-  const d = daysLeft(expiry);
-  if (d < 0) return { text: 'Expired', color: 'red' };
+const status = (member: Member) => {
+  const d = member.daysLeft;
+  if (d < 0) {
+    const late = Math.abs(d);
+    return { text: `${late} ${plural(late)} late`, color: 'red' };
+  }
   if (d === 0) return { text: 'Due today', color: 'yellow' };
-  if (d <= 7)
-    return { text: `${d} day${d === 1 ? '' : 's'} left`, color: 'yellow' };
-  return { text: `${d} days left`, color: 'green' };
+  return { text: `${d} ${plural(d)} left`, color: 'green' };
 };
 
-export default function MemberList() {
+export default function MemberList({ dueOnly }: { readonly dueOnly: boolean }) {
   const [page, setPage] = useState(1);
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -76,7 +79,9 @@ export default function MemberList() {
   const [debouncedQuery] = useDebouncedValue(query, 300);
 
   const q = debouncedQuery.trim().toLowerCase();
-  const filtered = members.filter((m) => m.name.toLowerCase().includes(q));
+  const filtered = members.filter(
+    (m) => (!dueOnly || !m.paymentDone) && m.name.toLowerCase().includes(q),
+  );
 
   const sorted = [...filtered].sort((a, b) =>
     a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
@@ -99,6 +104,10 @@ export default function MemberList() {
     console.log('Renew', m.name); // real logic comes later
   };
 
+  const handlePay = (m: Member) => {
+    console.log('Pay', m.name); // real logic comes later
+  };
+
   return (
     <Stack w="100%" gap="sm" mih={560}>
       <TextInput
@@ -109,7 +118,7 @@ export default function MemberList() {
 
       {visible.length === 0 && (
         <Text ta="center" c="dimmed">
-          No members found
+          {dueOnly ? 'No pending payments' : 'No members found'}
         </Text>
       )}
 
@@ -120,26 +129,62 @@ export default function MemberList() {
         onChange={setOpenId}
       >
         {visible.map((m) => {
-          const s = status(m.expiry);
+          const s = status(m);
+          const canRenew = m.daysLeft <= 0 && m.paymentDone;
+          const dayLabel = m.daysLeft === 1 ? 'day' : 'days';
+
+          const renewHint = !m.paymentDone
+            ? 'Please complete your payment'
+            : `Wait for ${m.daysLeft} ${dayLabel}`;
+
           return (
             <Accordion.Item key={m.id} value={String(m.id)}>
               <Group wrap="nowrap" gap={0} pr="xs">
                 <Accordion.Control style={{ flex: 1 }}>
                   <Group justify="space-between" wrap="nowrap" pr="xs">
-                    <Text fw={500}>{m.name}</Text>
+                    <Text size="md" fw={400}>
+                      {m.name}
+                    </Text>
                     <Badge color={s.color} variant="light">
                       {s.text}
                     </Badge>
                   </Group>
                 </Accordion.Control>
 
-                <Button
-                  size="xs"
-                  style={{ flexShrink: 0 }}
-                  onClick={() => handleRenew(m)}
-                >
-                  Renew
-                </Button>
+                <Group gap={6} wrap="nowrap" style={{ flexShrink: 0 }}>
+                  <Tooltip
+                    label="Payment already received"
+                    disabled={!m.paymentDone}
+                    events={{ hover: true, focus: true, touch: true }}
+                  >
+                    <div>
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        disabled={m.paymentDone}
+                        onClick={() => handlePay(m)}
+                      >
+                        Pay
+                      </Button>
+                    </div>
+                  </Tooltip>
+
+                  <Tooltip
+                    label={renewHint}
+                    disabled={canRenew}
+                    events={{ hover: true, focus: true, touch: true }}
+                  >
+                    <div>
+                      <Button
+                        size="xs"
+                        disabled={!canRenew}
+                        onClick={() => handleRenew(m)}
+                      >
+                        Renew
+                      </Button>
+                    </div>
+                  </Tooltip>
+                </Group>
               </Group>
 
               <Accordion.Panel>

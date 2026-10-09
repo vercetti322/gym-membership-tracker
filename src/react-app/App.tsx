@@ -1,5 +1,6 @@
 // src/App.tsx
 import '@mantine/core/styles.css';
+import { useState } from 'react';
 
 import {
   Button,
@@ -30,9 +31,18 @@ const theme = createTheme({
       '#9c2a13',
     ],
   },
+  fontSizes: {
+    xs: '0.5rem',
+    sm: '0.7rem',
+    md: '0.8rem',
+    lg: '0.9rem',
+    xl: '1rem',
+  },
 });
 
 function App() {
+  const [dueOnly, setDueOnly] = useState(false);
+
   return (
     <MantineProvider theme={theme}>
       <Container size={400} px="md">
@@ -43,11 +53,22 @@ function App() {
           <Text ta="center" w="100%" size="lg">
             Track your gym members for due payments.
           </Text>
-          <Group gap="sm">
-            <Button>New Member</Button>
-            <Button>Payments Due</Button>
-          </Group>
-          <MemberList />
+          {dueOnly ? (
+            <Group gap="sm">
+              <Button>New Member</Button>
+              <Button variant="outline" onClick={() => setDueOnly(false)}>
+                Go Back
+              </Button>
+            </Group>
+          ) : (
+            <Group gap="sm">
+              <Button>New Member</Button>
+              <Button variant="outline" onClick={() => setDueOnly(true)}>
+                Payments Due
+              </Button>
+            </Group>
+          )}
+          <MemberList key={dueOnly ? 'due' : 'all'} dueOnly={dueOnly} />
         </Stack>
       </Container>
     </MantineProvider>
