@@ -12,66 +12,64 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
-
-type Member = {
-  id: number;
-  name: string;
-  phone: string;
-  plan: string;
-  expiry: string;
-  daysLeft: number;
-  paymentDone: boolean;
-};
-
-const base: Member[] = [
-  {
-    id: 1,
-    name: 'Rahul Sharma',
-    phone: '9876543210',
-    plan: '3 months',
-    expiry: '2026-10-20',
-    daysLeft: 1,
-    paymentDone: true,
-  },
-  {
-    id: 2,
-    name: 'Anil Kumar',
-    phone: '9812345678',
-    plan: '1 month',
-    expiry: '2026-11-02',
-    daysLeft: 0,
-    paymentDone: false,
-  },
-  {
-    id: 3,
-    name: 'Priya Singh',
-    phone: '9988776655',
-    plan: '12 months',
-    expiry: '2026-10-09',
-    daysLeft: -5,
-    paymentDone: false,
-  },
-];
-
-const members: Member[] = Array.from({ length: 10 }, (_, i) => ({
-  ...base[i % 3],
-  id: i + 1,
-}));
+import type { Member } from '../types';
 
 const PAGE_SIZE = 7;
 const plural = (n: number) => (n === 1 ? 'day' : 'days');
 
 const status = (member: Member) => {
   const d = member.daysLeft;
+
+  if (d === null) {
+    return { text: 'No plan', color: 'gray' };
+  }
+
+  // Payment received: show remaining membership duration.
+  if (member.paymentDone) {
+    if (d < 0) {
+      return { text: 'Expired', color: 'gray' };
+    }
+
+    return {
+      text: `${d} ${plural(d)} left`,
+      color: 'green',
+    };
+  }
+
+  // Payment pending: show how overdue it is.
   if (d < 0) {
     const late = Math.abs(d);
-    return { text: `${late} ${plural(late)} late`, color: 'red' };
+    return {
+      text: `${late} ${plural(late)} late`,
+      color: 'red',
+    };
+  } else if (d === 0) {
+    return {
+      text: `Due Today`,
+      color: 'red',
+    };
   }
-  if (d === 0) return { text: 'Due today', color: 'yellow' };
-  return { text: `${d} ${plural(d)} left`, color: 'green' };
+
+  return {
+    text: `${d} ${plural(d)} left`,
+    color: 'green',
+  };
 };
 
-export default function MemberList({ dueOnly }: { readonly dueOnly: boolean }) {
+const renewHint = (member: Member) => {
+  const d = member.daysLeft;
+  if (d === null) return 'No plan yet';
+  if (!member.paymentDone) return 'Please complete your payment';
+  return `Wait for ${d} ${plural(d)}`;
+};
+
+export default function MemberList({
+  dueOnly,
+  members,
+}: {
+  readonly dueOnly: boolean;
+  readonly members: Member[];
+}) {
   const [page, setPage] = useState(1);
   const [openId, setOpenId] = useState<string | null>(null);
 
@@ -80,7 +78,9 @@ export default function MemberList({ dueOnly }: { readonly dueOnly: boolean }) {
 
   const q = debouncedQuery.trim().toLowerCase();
   const filtered = members.filter(
-    (m) => (!dueOnly || !m.paymentDone) && m.name.toLowerCase().includes(q),
+    (m) =>
+      (!dueOnly || (m.daysLeft !== null && !m.paymentDone)) &&
+      m.name.toLowerCase().includes(q),
   );
 
   const sorted = [...filtered].sort((a, b) =>
@@ -130,12 +130,10 @@ export default function MemberList({ dueOnly }: { readonly dueOnly: boolean }) {
       >
         {visible.map((m) => {
           const s = status(m);
-          const canRenew = m.daysLeft <= 0 && m.paymentDone;
-          const dayLabel = m.daysLeft === 1 ? 'day' : 'days';
-
-          const renewHint = !m.paymentDone
-            ? 'Please complete your payment'
-            : `Wait for ${m.daysLeft} ${dayLabel}`;
+          const hasPlan = m.daysLeft !== null;
+          const canRenew =
+            m.daysLeft !== null && m.daysLeft <= 0 && m.paymentDone;
+          const planLabel = `${m.planMonths === 1 ? 'month' : 'months'}`;
 
           return (
             <Accordion.Item key={m.id} value={String(m.id)}>
@@ -153,15 +151,15 @@ export default function MemberList({ dueOnly }: { readonly dueOnly: boolean }) {
 
                 <Group gap={6} wrap="nowrap" style={{ flexShrink: 0 }}>
                   <Tooltip
-                    label="Payment already received"
-                    disabled={!m.paymentDone}
+                    label={hasPlan ? 'Payment already received' : 'No plan yet'}
+                    disabled={hasPlan && !m.paymentDone}
                     events={{ hover: true, focus: true, touch: true }}
                   >
                     <div>
                       <Button
                         size="xs"
                         variant="outline"
-                        disabled={m.paymentDone}
+                        disabled={!hasPlan || m.paymentDone}
                         onClick={() => handlePay(m)}
                       >
                         Pay
@@ -170,7 +168,7 @@ export default function MemberList({ dueOnly }: { readonly dueOnly: boolean }) {
                   </Tooltip>
 
                   <Tooltip
-                    label={renewHint}
+                    label={renewHint(m)}
                     disabled={canRenew}
                     events={{ hover: true, focus: true, touch: true }}
                   >
@@ -201,13 +199,27 @@ export default function MemberList({ dueOnly }: { readonly dueOnly: boolean }) {
                     <Text size="sm" c="dimmed">
                       Plan:
                     </Text>
-                    <Text size="sm">{m.plan}</Text>
+                    <Text size="sm">
+                      {m.planMonths === null
+                        ? 'No plan'
+                        : `${m.planMonths} ${planLabel}`}
+                    </Text>
+                  </Group>
+                  <Group gap="xs">
+                    <Text size="sm" c="dimmed">
+                      Payment Date:
+                    </Text>
+                    <Text size="sm">
+                      {m.paymentDate === null
+                        ? '-'
+                        : `${m.paymentDate} by ${m.paymentMode}`}
+                    </Text>
                   </Group>
                   <Group gap="xs">
                     <Text size="sm" c="dimmed">
                       Expires:
                     </Text>
-                    <Text size="sm">{m.expiry}</Text>
+                    <Text size="sm">{m.expiry ?? '-'}</Text>
                   </Group>
                 </Stack>
               </Accordion.Panel>

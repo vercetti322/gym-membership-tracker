@@ -45,7 +45,11 @@
     "deploy": "wrangler deploy",
     "dev": "vite",
     "lint": "eslint .",
-    "preview": "npm run build && vite preview"
+    "db:seed": "wrangler d1 execute gym-tracker-db --local --file=seed.sql",
+    "preview": "npm run build && vite preview",
+    "db:migrate": "wrangler d1 migrations apply gym-tracker-db --local",
+    "db:migrate:remote": "wrangler d1 migrations apply gym-tracker-db --remote",
+    "db:tables": "wrangler d1 execute gym-tracker-db --local --command \"SELECT name FROM sqlite_master WHERE type='table'\""
   },
   "type": "module"
 }
