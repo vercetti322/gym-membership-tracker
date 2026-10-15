@@ -30,7 +30,7 @@ function App() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [dueOnly, setDueOnly] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
   const lastLoaded = useRef(0);
 
@@ -56,8 +56,6 @@ function App() {
   }, []);
 
   const loadMembers = useCallback(async () => {
-    setLoading(true);
-
     try {
       const response = await fetch('/api/members');
 
@@ -73,10 +71,11 @@ function App() {
       const data: Member[] = await response.json();
       setMembers(data);
       setError(false);
+      lastLoaded.current = Date.now();
     } catch {
       setError(true);
     } finally {
-      setLoading(false);
+      setLoaded(true);
     }
   }, []);
 
@@ -85,7 +84,6 @@ function App() {
     if (authenticated !== true) return;
     void loadMembers();
 
-    lastLoaded.current = Date.now();
     const onVisible = () => {
       if (
         document.visibilityState === 'visible' &&
@@ -128,9 +126,9 @@ function App() {
           </Group>
         )}
 
-        {loading && <Text>Loading...</Text>}
+        {!loaded && !error && <Text>Loading...</Text>}
 
-        {!loading && error && (
+        {error && (
           <Stack align="center" gap="xs">
             <Text c="red">Could not load members. Please try again.</Text>
             <Button variant="subtle" onClick={() => void loadMembers()}>
@@ -139,7 +137,7 @@ function App() {
           </Stack>
         )}
 
-        {!loading && !error && (
+        {loaded && !error && (
           <MemberList
             key={dueOnly ? 'due' : 'all'}
             dueOnly={dueOnly}
