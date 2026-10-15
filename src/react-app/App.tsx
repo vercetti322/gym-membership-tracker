@@ -1,5 +1,5 @@
 import '@mantine/core/styles.css';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 
 import {
   Button,
@@ -32,6 +32,7 @@ function App() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
+  const lastLoaded = useRef(0);
 
   // Check whether the owner has a valid session.
   useEffect(() => {
@@ -82,11 +83,14 @@ function App() {
   // Load members only after authentication succeeds.
   useEffect(() => {
     if (authenticated !== true) return;
-
     void loadMembers();
 
+    lastLoaded.current = Date.now();
     const onVisible = () => {
-      if (document.visibilityState === 'visible') {
+      if (
+        document.visibilityState === 'visible' &&
+        Date.now() - lastLoaded.current > 75_000
+      ) {
         void loadMembers();
       }
     };
