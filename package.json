@@ -13,7 +13,9 @@
   },
   "dependencies": {
     "@mantine/core": "^9.7.1",
+    "@mantine/dates": "^9.7.2",
     "@mantine/hooks": "^9.7.1",
+    "dayjs": "^1.11.23",
     "hono": "4.11.1",
     "react": "19.2.1",
     "react-dom": "19.2.1"
@@ -47,6 +49,8 @@
     "lint": "eslint .",
     "db:seed": "wrangler d1 execute gym-tracker-db --local --file=seed.sql",
     "preview": "npm run build && vite preview",
+    "db:seed:remote": "wrangler d1 execute gym-tracker-db --remote --file=seed.sql",
+    "db:tables:remote": "wrangler d1 execute gym-tracker-db --remote --command \"SELECT name FROM sqlite_master WHERE type='table'\"",
     "db:migrate": "wrangler d1 migrations apply gym-tracker-db --local",
     "db:migrate:remote": "wrangler d1 migrations apply gym-tracker-db --remote",
     "db:tables": "wrangler d1 execute gym-tracker-db --local --command \"SELECT name FROM sqlite_master WHERE type='table'\""

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, PasswordInput, Stack, Text, Title } from '@mantine/core';
+import { Button, PasswordInput, Stack, Text } from '@mantine/core';
 
 export default function Login({ onLogin }: { readonly onLogin: () => void }) {
   const [password, setPassword] = useState('');
@@ -32,13 +32,9 @@ export default function Login({ onLogin }: { readonly onLogin: () => void }) {
 
   return (
     <Stack align="stretch" maw={320} w="100%">
-      <Title order={2} ta="center" c="blue">
-        Power Bull Gym
-      </Title>
-      <Text ta="center">Enter your password to continue.</Text>
-
       <PasswordInput
-        label="Password"
+        placeholder="Password"
+        aria-label="Password"
         value={password}
         onChange={(event) => setPassword(event.currentTarget.value)}
         onKeyDown={(event) => {
