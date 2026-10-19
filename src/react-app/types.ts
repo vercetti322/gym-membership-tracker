@@ -2,6 +2,7 @@ export type Member = {
   id: number;
   name: string;
   phone: string;
+  isActive: boolean;
   planMonths: number | null;
   expiry: string | null;
   daysLeft: number | null;

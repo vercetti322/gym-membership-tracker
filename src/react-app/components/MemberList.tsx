@@ -5,6 +5,7 @@ import {
   Badge,
   Group,
   Pagination,
+  SimpleGrid,
   Stack,
   Text,
   TextInput,
@@ -18,13 +19,17 @@ const PAGE_SIZE = 7;
 
 const status = (member: Member) => {
   const d = member.daysLeft;
-  if (d === null) return { text: 'No plan', color: 'gray' };
+
+  if (d === null) return { text: 'No plan', color: 'gray' as const };
+
   if (d < 0) {
     const late = Math.abs(d);
-    return { text: `${late} ${plural(late)} late`, color: 'red' };
+    return { text: `${late} ${plural(late)} late`, color: 'red' as const };
   }
-  if (d === 0) return { text: 'Due today', color: 'red' };
-  return { text: `${d} ${plural(d)} left`, color: 'green' };
+
+  if (d === 0) return { text: 'Due today', color: 'red' as const };
+
+  return { text: `${d} ${plural(d)} left`, color: 'green' as const };
 };
 
 export default function MemberList({
@@ -36,11 +41,11 @@ export default function MemberList({
 }) {
   const [page, setPage] = useState(1);
   const [openId, setOpenId] = useState<string | null>(null);
-
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(query, 300);
 
   const q = debouncedQuery.trim().toLowerCase();
+
   const filtered = members.filter(
     (m) => (!dueOnly || canRenew(m)) && m.name.toLowerCase().includes(q),
   );
@@ -50,7 +55,12 @@ export default function MemberList({
   );
 
   const pages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
-  const visible = sorted.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const currentPage = Math.min(page, pages);
+
+  const visible = sorted.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE,
+  );
 
   const goTo = (p: number) => {
     setPage(p);
@@ -59,7 +69,8 @@ export default function MemberList({
 
   const onSearch = (value: string) => {
     setQuery(value);
-    goTo(1);
+    setPage(1);
+    setOpenId(null);
   };
 
   return (
@@ -84,69 +95,137 @@ export default function MemberList({
       >
         {visible.map((m) => {
           const s = status(m);
-          const planLabel = m.planMonths === 1 ? 'month' : 'months';
+
+          let planLabel = 'No plan';
+
+          if (m.planMonths !== null) {
+            const unit = m.planMonths === 1 ? 'month' : 'months';
+            planLabel = `${m.planMonths} ${unit}`;
+          }
 
           return (
             <Accordion.Item key={m.id} value={String(m.id)}>
               <Group wrap="nowrap" gap={0} pr="xs">
-                <Accordion.Control style={{ flex: 1 }}>
-                  <Group justify="space-between" wrap="nowrap" pr="xs">
-                    <Text size="md" fw={400}>
+                <Accordion.Control style={{ flex: 1, minWidth: 0 }}>
+                  <Group justify="space-between" wrap="nowrap" pr="xs" gap="xs">
+                    <Text size="md" fw={400} lineClamp={1}>
                       {m.name}
                     </Text>
-                    <Badge color={s.color} variant="light">
+
+                    <Badge
+                      color={s.color}
+                      variant="light"
+                      style={{ flexShrink: 0 }}
+                    >
                       {s.text}
                     </Badge>
                   </Group>
                 </Accordion.Control>
+
                 <Group gap={6} wrap="nowrap" style={{ flexShrink: 0 }}>
                   <RenewButton member={m} />
                 </Group>
               </Group>
+
               <Accordion.Panel>
-                <Stack gap={6}>
-                  <Group gap="xs">
-                    <Text size="sm" c="dimmed">
-                      Phone:
-                    </Text>
-                    <Anchor size="sm" href={`tel:${m.phone}`}>
-                      {m.phone}
-                    </Anchor>
-                  </Group>
-                  <Group gap="xs">
-                    <Text size="sm" c="dimmed">
-                      Plan:
-                    </Text>
-                    <Text size="sm">
-                      {m.planMonths === null
-                        ? 'No plan'
-                        : `${m.planMonths} ${planLabel}`}
-                    </Text>
-                  </Group>
-                  <Group gap="xs">
-                    <Text size="sm" c="dimmed">
-                      Payment Date:
-                    </Text>
-                    <Text size="sm">
-                      {m.paymentDate === null
-                        ? '-'
-                        : `${formatDate(m.paymentDate)} (${m.paymentMode})`}
-                    </Text>
-                  </Group>
-                  <Group gap="xs">
-                    <Text size="sm" c="dimmed">
-                      Expires:
-                    </Text>
-                    <Text size="sm">{formatDate(m.expiry)}</Text>
-                  </Group>
+                <Stack gap="md">
+                  <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
+                    <Stack
+                      gap={4}
+                      p="sm"
+                      style={{
+                        border: '1px solid var(--mantine-color-default-border)',
+                        borderRadius: 'var(--mantine-radius-md)',
+                      }}
+                    >
+                      <Text size="xs" c="dimmed">
+                        Phone
+                      </Text>
+                      <Anchor size="sm" href={`tel:${m.phone}`} fw={500}>
+                        {m.phone}
+                      </Anchor>
+                    </Stack>
+
+                    <Stack
+                      gap={4}
+                      p="sm"
+                      style={{
+                        border: '1px solid var(--mantine-color-default-border)',
+                        borderRadius: 'var(--mantine-radius-md)',
+                      }}
+                    >
+                      <Text size="xs" c="dimmed">
+                        Plan
+                      </Text>
+                      <Text size="sm" fw={500}>
+                        {planLabel}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
+
+                  <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="sm">
+                    <Stack
+                      gap={4}
+                      p="sm"
+                      style={{
+                        border: '1px solid var(--mantine-color-default-border)',
+                        borderRadius: 'var(--mantine-radius-md)',
+                      }}
+                    >
+                      <Text size="xs" c="dimmed">
+                        Start date
+                      </Text>
+                      <Text size="sm" fw={500}>
+                        {formatDate(m.paymentDate)}
+                      </Text>
+                    </Stack>
+
+                    <Stack
+                      gap={4}
+                      p="sm"
+                      style={{
+                        border: '1px solid var(--mantine-color-default-border)',
+                        borderRadius: 'var(--mantine-radius-md)',
+                      }}
+                    >
+                      <Text size="xs" c="dimmed">
+                        End date
+                      </Text>
+                      <Text size="sm" fw={500}>
+                        {formatDate(m.expiry)}
+                      </Text>
+                    </Stack>
+
+                    <Stack
+                      gap={4}
+                      p="sm"
+                      style={{
+                        border: '1px solid var(--mantine-color-default-border)',
+                        borderRadius: 'var(--mantine-radius-md)',
+                      }}
+                    >
+                      <Text size="xs" c="dimmed">
+                        Payment method
+                      </Text>
+                      <Text size="sm" fw={500}>
+                        {m.paymentMode ?? '-'}
+                      </Text>
+                    </Stack>
+                  </SimpleGrid>
                 </Stack>
               </Accordion.Panel>
             </Accordion.Item>
           );
         })}
       </Accordion>
+
       <Group justify="center" mt="xs">
-        <Pagination total={pages} value={page} onChange={goTo} size="sm" />
+        <Pagination
+          total={pages}
+          value={currentPage}
+          onChange={goTo}
+          size="sm"
+        />
       </Group>
     </Stack>
   );
