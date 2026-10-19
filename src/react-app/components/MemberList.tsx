@@ -126,92 +126,67 @@ export default function MemberList({
                   <RenewButton member={m} />
                 </Group>
               </Group>
-
               <Accordion.Panel>
-                <Stack gap="md">
-                  <SimpleGrid cols={{ base: 1, xs: 2 }} spacing="sm">
-                    <Stack
-                      gap={4}
-                      p="sm"
-                      style={{
-                        border: '1px solid var(--mantine-color-default-border)',
-                        borderRadius: 'var(--mantine-radius-md)',
-                      }}
-                    >
-                      <Text size="xs" c="dimmed">
-                        Phone
+                <Stack gap="lg" pt="sm">
+                  {/* Contact and plan */}
+                  <SimpleGrid cols={2} spacing="md">
+                    <Stack gap={6} style={{ minWidth: 0 }}>
+                      <Text size="sm" c="dimmed">
+                        Phone number
                       </Text>
-                      <Anchor size="sm" href={`tel:${m.phone}`} fw={500}>
+
+                      <Anchor
+                        size="md"
+                        fw={500}
+                        href={`tel:${m.phone}`}
+                        style={{ width: 'fit-content' }}
+                      >
                         {m.phone}
                       </Anchor>
                     </Stack>
 
-                    <Stack
-                      gap={4}
-                      p="sm"
-                      style={{
-                        border: '1px solid var(--mantine-color-default-border)',
-                        borderRadius: 'var(--mantine-radius-md)',
-                      }}
-                    >
-                      <Text size="xs" c="dimmed">
-                        Plan
+                    <Stack gap={6} style={{ minWidth: 0 }}>
+                      <Text size="sm" c="dimmed">
+                        Membership plan
                       </Text>
-                      <Text size="sm" fw={500}>
+
+                      <Text size="md" fw={600}>
                         {planLabel}
                       </Text>
                     </Stack>
                   </SimpleGrid>
 
-                  <SimpleGrid cols={{ base: 1, xs: 3 }} spacing="sm">
-                    <Stack
-                      gap={4}
-                      p="sm"
-                      style={{
-                        border: '1px solid var(--mantine-color-default-border)',
-                        borderRadius: 'var(--mantine-radius-md)',
-                      }}
-                    >
-                      <Text size="xs" c="dimmed">
-                        Start date
+                  {/* Membership dates */}
+                  <SimpleGrid cols={2} spacing="md">
+                    <Stack gap={6} style={{ minWidth: 0 }}>
+                      <Text size="sm" c="dimmed">
+                        Starts
                       </Text>
-                      <Text size="sm" fw={500}>
+                      <Text size="md" fw={600}>
                         {formatDate(m.paymentDate)}
                       </Text>
                     </Stack>
 
-                    <Stack
-                      gap={4}
-                      p="sm"
-                      style={{
-                        border: '1px solid var(--mantine-color-default-border)',
-                        borderRadius: 'var(--mantine-radius-md)',
-                      }}
-                    >
-                      <Text size="xs" c="dimmed">
-                        End date
+                    <Stack gap={6} style={{ minWidth: 0 }}>
+                      <Text size="sm" c="dimmed">
+                        Expires
                       </Text>
-                      <Text size="sm" fw={500}>
+                      <Text size="md" fw={600}>
                         {formatDate(m.expiry)}
                       </Text>
                     </Stack>
-
-                    <Stack
-                      gap={4}
-                      p="sm"
-                      style={{
-                        border: '1px solid var(--mantine-color-default-border)',
-                        borderRadius: 'var(--mantine-radius-md)',
-                      }}
-                    >
-                      <Text size="xs" c="dimmed">
-                        Payment method
-                      </Text>
-                      <Text size="sm" fw={500}>
-                        {m.paymentMode ?? '-'}
-                      </Text>
-                    </Stack>
                   </SimpleGrid>
+
+                  {/* Payment method */}
+                  <Group gap="sm" align="center" wrap="wrap">
+                    <Text size="sm" c="dimmed">
+                      Payment method
+                    </Text>
+
+                    <Text size="md" fw={600}>
+                      {m.paymentMode ?? '—'}
+                    </Text>
+                  </Group>
                 </Stack>
               </Accordion.Panel>
             </Accordion.Item>

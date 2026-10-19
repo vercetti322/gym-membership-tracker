@@ -150,7 +150,7 @@ function App() {
 
   return (
     <MantineProvider theme={theme}>
-      <Container size={400} px="md">
+      <Container size={350} px="md">
         <Stack align="center" gap="md" mih="100dvh" pt="xl">
           <Title order={1} ta="center" c="blue">
             Power Bull Gym
