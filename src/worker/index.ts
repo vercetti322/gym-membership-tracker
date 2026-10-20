@@ -28,7 +28,7 @@ app.get('/api/auth/me', (c) => {
 app.get('/api/members', (c) => getAllMembers(c));
 
 // Get a specific member
-app.get('/api/memebers/:id', (c) => getMember(c));
+app.get('/api/members/:id', (c) => getMember(c));
 
 // Create a new member with plan
 app.post('/api/members', (c) => createNewMember(c));
