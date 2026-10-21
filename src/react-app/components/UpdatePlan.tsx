@@ -58,7 +58,8 @@ export default function RenewButton({ member }: { readonly member: Member }) {
   const [to, setTo] = useState<string | null>(null);
 
   const enabled = canRenew(member);
-  const validRange = from !== null && to !== null && !dayjs(to).isBefore(from);
+  const validRange =
+    from !== null && to !== null && dayjs(to).diff(dayjs(from), 'day') > 15;
   const isRenew = action === 'renew';
   const months = calculateMonths(from, to);
 
@@ -77,13 +78,65 @@ export default function RenewButton({ member }: { readonly member: Member }) {
     if (value) setTo(defaultTo(value, member.planMonths));
   };
 
-  const confirm = () => {
+  const confirm = async () => {
     if (isRenew) {
-      console.log('Renew', member.name, mode, from, to); // real API call comes later
+      await renewPlan();
     } else {
-      console.log('Mark inactive', member.name); // real API call comes later
+      await markInactive();
     }
-    setOpened(false);
+  };
+
+  const renewPlan = async () => {
+    if (!from || !to || months <= 0) return;
+
+    try {
+      const response = await fetch(`/api/members/${member.id}/renewals`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          startDate: from,
+          endDate: to,
+          planDuration: months,
+          paymentMode: mode,
+        }),
+      });
+
+      const data: { message?: string; error?: string } = await response.json();
+
+      if (!response.ok) {
+        alert(data.error ?? 'Failed to renew member plan');
+        return;
+      }
+
+      setOpened(false);
+      window.location.reload();
+    } catch {
+      alert('Unable to connect to the server. Please try again.');
+    }
+  };
+
+  const markInactive = async () => {
+    try {
+      const response = await fetch(`/api/members/${member.id}`, {
+        method: 'PATCH',
+        credentials: 'include',
+      });
+
+      const data: { message?: string; error?: string } = await response.json();
+
+      if (!response.ok) {
+        alert(data.error ?? 'Failed to mark member inactive');
+        return;
+      }
+
+      setOpened(false);
+      window.location.reload();
+    } catch {
+      alert('Unable to connect to the server. Please try again.');
+    }
   };
 
   return (

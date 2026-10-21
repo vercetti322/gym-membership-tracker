@@ -70,6 +70,42 @@ export const GET_A_MEMBER = `
   LIMIT 1
 `;
 
+export const MARK_INACTIVE = `
+  UPDATE member_details
+  SET is_active = 0
+  WHERE member_id = ?;
+`;
+
+export const RENEW_MEMBER_PLAN = `
+  INSERT INTO member_plan_audit (
+    member_id,
+    plan_duration,
+    price,
+    start_date,
+    end_date,
+    payment_mode
+  ) VALUES (?, ?, ?, ?, ?, ?)
+`;
+
+export const INSERT_MEMBER = `
+  INSERT INTO member_details (name, phone)
+  VALUES (?, ?)
+`;
+
+export const INSERT_MEMBER_PLAN = `
+  INSERT INTO member_plan_audit (
+    member_id,
+    plan_duration,
+    price,
+    start_date,
+    end_date,
+    payment_mode
+  )
+  SELECT member_id, ?, ?, ?, ?, ?
+  FROM member_details
+  WHERE phone = ?
+`;
+
 export const PERSIST_SESSION_TOKEN = `
   INSERT INTO sessions (id, expires_at) 
   VALUES (?, ?)

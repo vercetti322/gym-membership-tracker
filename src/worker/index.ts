@@ -3,7 +3,6 @@ import {
   getAllMembers,
   createNewMember,
   renewMemberPlan,
-  deleteMember,
   updateMemberDetails,
   getMember,
 } from './service';
@@ -36,10 +35,7 @@ app.post('/api/members', (c) => createNewMember(c));
 // Renew a member with plan
 app.post('/api/members/:id/renewals', (c) => renewMemberPlan(c));
 
-// Delete a specific member
-app.delete('/api/members/:id', (c) => deleteMember(c));
-
-// Update details for a specific member
+// Mark a specific member inactive
 app.patch('/api/members/:id', (c) => updateMemberDetails(c));
 
 export default app;

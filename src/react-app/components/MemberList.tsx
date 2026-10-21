@@ -13,7 +13,7 @@ import {
 import { useDebouncedValue } from '@mantine/hooks';
 import type { Member } from '../types';
 import { canRenew, plural, formatDate } from '../utils/MemberUtils';
-import RenewButton from './UpdateButton';
+import RenewButton from './UpdatePlan';
 
 const PAGE_SIZE = 7;
 

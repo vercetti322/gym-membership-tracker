@@ -1,6 +1,6 @@
 import '@mantine/core/styles.css';
 import { useCallback, useEffect, useState, useRef } from 'react';
-
+import NewMember from './components/NewMember';
 import {
   Button,
   Container,
@@ -112,14 +112,14 @@ function App() {
       <>
         {dueOnly ? (
           <Group gap="sm">
-            <Button>New Member</Button>
+            <NewMember />
             <Button variant="outline" onClick={() => setDueOnly(false)}>
               Go Back
             </Button>
           </Group>
         ) : (
           <Group gap="sm">
-            <Button>New Member</Button>
+            <NewMember />
             <Button variant="outline" onClick={() => setDueOnly(true)}>
               Payments Due
             </Button>
