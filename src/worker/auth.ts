@@ -10,9 +10,18 @@ import {
 const COOKIE = 'gym_session';
 const SESSION_SECONDS = 60 * 60 * 24 * 30;
 
-async function hash(token: string) {
-  const digest = await crypto.subtle.digest(
-    'SHA-256',
+async function hash(token: string, password: string) {
+  const key = await crypto.subtle.importKey(
+    'raw',
+    new TextEncoder().encode(password),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign'],
+  );
+
+  const digest = await crypto.subtle.sign(
+    'HMAC',
+    key,
     new TextEncoder().encode(token),
   );
 
@@ -44,7 +53,10 @@ export const login = async (c: Context) => {
 
   await c.env.gym_tracker_db
     .prepare(PERSIST_SESSION_TOKEN)
-    .bind(await hash(token), Math.floor(Date.now() / 1000) + SESSION_SECONDS)
+    .bind(
+      await hash(token, c.env.ADMIN_PASSWORD),
+      Math.floor(Date.now() / 1000) + SESSION_SECONDS,
+    )
     .run();
 
   setCookie(c, COOKIE, token, {
@@ -64,7 +76,7 @@ export const logout = async (c: Context) => {
   if (token) {
     await c.env.gym_tracker_db
       .prepare(DELETE_SESSION_TOKEN)
-      .bind(await hash(token))
+      .bind(await hash(token, c.env.ADMIN_PASSWORD))
       .run();
   }
 
@@ -86,7 +98,10 @@ export const requireAuth = createMiddleware(async (c, next) => {
 
   const session = await c.env.gym_tracker_db
     .prepare(GET_SESSION_TOKEN)
-    .bind(await hash(token), Math.floor(Date.now() / 1000))
+    .bind(
+      await hash(token, c.env.ADMIN_PASSWORD),
+      Math.floor(Date.now() / 1000),
+    )
     .first();
 
   if (!session) {
