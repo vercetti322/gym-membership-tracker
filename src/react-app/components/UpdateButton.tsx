@@ -134,6 +134,9 @@ export default function RenewButton({ member }: { readonly member: Member }) {
                   onChange={onFromChange}
                   size="md"
                   clearable={false}
+                  styles={{
+                    input: { fontSize: '12px' },
+                  }}
                 />
 
                 <DatePickerInput
@@ -144,6 +147,9 @@ export default function RenewButton({ member }: { readonly member: Member }) {
                   minDate={from ?? undefined}
                   size="md"
                   clearable={false}
+                  styles={{
+                    input: { fontSize: '12px' },
+                  }}
                 />
 
                 <TextInput
@@ -153,6 +159,7 @@ export default function RenewButton({ member }: { readonly member: Member }) {
                   size="md"
                   styles={{
                     input: {
+                      fontSize: '12px',
                       fontWeight: 500,
                     },
                   }}
@@ -190,8 +197,8 @@ export default function RenewButton({ member }: { readonly member: Member }) {
           ) : (
             <Stack gap="md">
               <Text size="sm" c="dimmed" lh={1.5}>
-                Deactivating removes the member from the active member
-                list and payment reminders.
+                Deactivating removes the member from the active member list and
+                payment reminders.
               </Text>
 
               <Button
