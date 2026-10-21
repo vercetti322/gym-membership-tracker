@@ -30,7 +30,11 @@ const calculateMonths = (from: string | null, to: string | null) => {
   return wholeMonths + (remainderDays > 15 ? 1 : 0);
 };
 
-export default function CreateMemberButton() {
+export default function CreateMemberButton({
+  onCreated,
+}: {
+  readonly onCreated: () => Promise<void>;
+}) {
   const [opened, setOpened] = useState(false);
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
@@ -89,7 +93,7 @@ export default function CreateMemberButton() {
       }
 
       setOpened(false);
-      window.location.reload();
+      await onCreated();
     } catch {
       alert('Unable to connect to the server. Please try again.');
     }

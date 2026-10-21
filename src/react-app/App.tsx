@@ -136,7 +136,7 @@ function App() {
     content = (
       <>
         <Group gap="sm">
-          <NewMember />
+          <NewMember onCreated={loadMembers} />
 
           {dueOnly ? (
             <Button variant="outline" onClick={() => setDueOnly(false)}>
@@ -164,6 +164,7 @@ function App() {
             key={dueOnly ? 'due' : 'all'}
             dueOnly={dueOnly}
             members={members}
+            onMemberUpdated={loadMembers}
           />
         )}
       </>

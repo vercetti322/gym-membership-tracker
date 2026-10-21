@@ -35,9 +35,11 @@ const status = (member: Member) => {
 export default function MemberList({
   dueOnly,
   members,
+  onMemberUpdated,
 }: {
   readonly dueOnly: boolean;
   readonly members: Member[];
+  readonly onMemberUpdated: () => Promise<void>;
 }) {
   const [page, setPage] = useState(1);
   const [openId, setOpenId] = useState<string | null>(null);
@@ -123,12 +125,12 @@ export default function MemberList({
                 </Accordion.Control>
 
                 <Group gap={6} wrap="nowrap" style={{ flexShrink: 0 }}>
-                  <RenewButton member={m} />
+                  <RenewButton member={m} onUpdated={onMemberUpdated} />
                 </Group>
               </Group>
+
               <Accordion.Panel>
                 <Stack gap="lg" pt="sm">
-                  {/* Contact and plan */}
                   <SimpleGrid cols={2} spacing="md">
                     <Stack gap={6} style={{ minWidth: 0 }}>
                       <Text size="sm" c="dimmed">
@@ -156,7 +158,6 @@ export default function MemberList({
                     </Stack>
                   </SimpleGrid>
 
-                  {/* Membership dates */}
                   <SimpleGrid cols={2} spacing="md">
                     <Stack gap={6} style={{ minWidth: 0 }}>
                       <Text size="sm" c="dimmed">
@@ -177,7 +178,6 @@ export default function MemberList({
                     </Stack>
                   </SimpleGrid>
 
-                  {/* Payment method */}
                   <Group gap="sm" align="center" wrap="wrap">
                     <Text size="sm" c="dimmed">
                       Payment method

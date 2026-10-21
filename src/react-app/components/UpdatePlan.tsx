@@ -50,7 +50,13 @@ const calculateMonths = (from: string | null, to: string | null) => {
   return wholeMonths + (remainderDays > 15 ? 1 : 0);
 };
 
-export default function RenewButton({ member }: { readonly member: Member }) {
+export default function RenewButton({
+  member,
+  onUpdated,
+}: {
+  readonly member: Member;
+  readonly onUpdated: () => Promise<void>;
+}) {
   const [opened, setOpened] = useState(false);
   const [action, setAction] = useState('renew'); // 'renew' | 'inactive'
   const [mode, setMode] = useState('UPI');
@@ -112,7 +118,7 @@ export default function RenewButton({ member }: { readonly member: Member }) {
       }
 
       setOpened(false);
-      window.location.reload();
+      await onUpdated();
     } catch {
       alert('Unable to connect to the server. Please try again.');
     }
@@ -133,7 +139,7 @@ export default function RenewButton({ member }: { readonly member: Member }) {
       }
 
       setOpened(false);
-      window.location.reload();
+      await onUpdated();
     } catch {
       alert('Unable to connect to the server. Please try again.');
     }
