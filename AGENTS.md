@@ -1,62 +1,27 @@
-# Cloudflare Workers
+# Project Guidelines
 
-STOP. Your knowledge of Cloudflare Workers APIs and limits may be outdated. Always retrieve current documentation before any Workers, KV, R2, D1, Durable Objects, Queues, Vectorize, AI, or Agents SDK task.
+## Architecture
 
-## Docs
+- The React and Mantine client is in `src/react-app/`; the Hono API and D1 data access are in `src/worker/`.
+- D1 schema changes belong in a new ordered SQL migration under `migrations/`. Do not edit an already-applied migration.
+- Keep secrets out of source control. Use `.dev.vars` locally and Worker secrets for deployed environments.
 
-- https://developers.cloudflare.com/workers/
-- MCP: `https://docs.mcp.cloudflare.com/mcp`
+## Code Style
 
-For all limits and quotas, retrieve from the product's `/platform/limits/` page. eg. `/workers/platform/limits`
+- Use TypeScript and follow the existing patterns and formatting in nearby files.
+- Keep changes focused; preserve the existing client/API boundary and use the shared member types where applicable.
+- Update the README when setup, scripts, routes, or other user-facing project behavior changes.
 
-## Commands
+## Build and Validation
 
-| Command | Purpose |
-|---------|---------|
-| `npx wrangler dev` | Local development |
-| `npx wrangler deploy` | Deploy to Cloudflare |
-| `npx wrangler types` | Generate TypeScript types |
+- `npm run build` — type-check and build the client and Worker.
+- `npm run lint` — run ESLint.
+- `npm run check` — build and run a Wrangler deployment dry run.
+- Run the narrowest relevant validation for each change; run build and lint for broader changes.
 
-Run `wrangler types` after changing bindings in wrangler.jsonc.
+## Cloudflare
 
-## Local Explorer (Debugging & Inspection)
-
-When running `npx wrangler dev`, a Local Explorer API is available for inspecting and debugging local Workers, bindings, and storage state. The API base URL is printed in the terminal when the dev server starts.
-
-Key endpoints (relative to the dev server URL):
-
-| Endpoint | Description |
-|----------|-------------|
-| `GET /cdn-cgi/local/explorer/api/local/workers` | List local Workers and their bindings |
-| `GET /cdn-cgi/local/explorer/api/storage/kv/namespaces` | List KV namespaces |
-| `GET /cdn-cgi/local/explorer/api/d1/database` | List D1 databases |
-| `GET /cdn-cgi/local/explorer/api/r2/buckets` | List R2 buckets |
-| `GET /cdn-cgi/local/explorer/api/workers/durable_objects/namespaces` | List Durable Object namespaces |
-| `GET /cdn-cgi/local/explorer/api/workflows` | List Workflows |
-| `POST /cdn-cgi/local/explorer/api/local/observability/query` | Run a read-only SQL query (SELECT/WITH only) over captured request traces and console logs. Tables: `spans`, `logs` (read attributes via `json(attributes)`). Example: `curl -X POST <base>/cdn-cgi/local/explorer/api/local/observability/query -H 'Content-Type: application/json' -d '{"sql":"SELECT service, name, outcome, duration_ms FROM spans WHERE parent_id IS NULL LIMIT 20"}'` |
-| `POST /cdn-cgi/local/explorer/api/local/observability/clear` | Clear all captured traces and logs |
-
-If the routes above don't cover what you need, fetch the full OpenAPI schema (large - use only as a last resort): `GET /cdn-cgi/local/explorer/api`
-
-Use the Local Explorer to debug issues by inspecting storage state (KV keys, D1 rows, R2 objects, DO storage), viewing Worker bindings, and querying request traces and logs captured during the dev session.
-
-## Node.js Compatibility
-
-https://developers.cloudflare.com/workers/runtime-apis/nodejs/
-
-## Errors
-
-- **Error 1102** (CPU/Memory exceeded): Retrieve limits from `/workers/platform/limits/`
-- **All errors**: https://developers.cloudflare.com/workers/observability/errors/
-
-## Product Docs
-
-Retrieve API references and limits from:
-`/kv/` · `/r2/` · `/d1/` · `/durable-objects/` · `/queues/` · `/vectorize/` · `/workers-ai/` · `/agents/`
-
-## Best Practices (conditional)
-
-If the application uses Durable Objects or Workflows, refer to the relevant best practices:
-
-- Durable Objects: https://developers.cloudflare.com/durable-objects/best-practices/rules-of-durable-objects/
-- Workflows: https://developers.cloudflare.com/workflows/build/rules-of-workflows/
+- For changes involving Workers, D1, Wrangler, or another Cloudflare product, consult the current official Cloudflare documentation before implementation; do not rely on remembered API behavior or limits.
+- For limits and quotas, use that product's official limits page.
+- After changing Cloudflare bindings in `wrangler.json`, run `npm run cf-typegen`.
+- Treat remote database commands as operations against real data. In particular, `npm run db:seed:remote` deletes existing member and plan-history rows.
