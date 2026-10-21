@@ -1,11 +1,12 @@
 import { useState } from 'react';
 import {
   Button,
-  Group,
   Modal,
   SegmentedControl,
+  SimpleGrid,
   Stack,
   Text,
+  TextInput,
   Tooltip,
 } from '@mantine/core';
 import { DatePickerInput } from '@mantine/dates';
@@ -37,6 +38,18 @@ const defaultTo = (from: string, months: number | null) =>
     .subtract(1, 'day')
     .format(FORMAT);
 
+const calculateMonths = (from: string | null, to: string | null) => {
+  if (!from || !to || dayjs(to).isBefore(from, 'day')) return 0;
+
+  const start = dayjs(from);
+  const end = dayjs(to);
+
+  const wholeMonths = end.diff(start, 'month');
+  const remainderDays = end.diff(start.add(wholeMonths, 'month'), 'day');
+
+  return wholeMonths + (remainderDays > 15 ? 1 : 0);
+};
+
 export default function RenewButton({ member }: { readonly member: Member }) {
   const [opened, setOpened] = useState(false);
   const [action, setAction] = useState('renew'); // 'renew' | 'inactive'
@@ -47,6 +60,7 @@ export default function RenewButton({ member }: { readonly member: Member }) {
   const enabled = canRenew(member);
   const validRange = from !== null && to !== null && !dayjs(to).isBefore(from);
   const isRenew = action === 'renew';
+  const months = calculateMonths(from, to);
 
   const open = () => {
     const start = defaultFrom(member);
@@ -90,71 +104,106 @@ export default function RenewButton({ member }: { readonly member: Member }) {
         opened={opened}
         onClose={() => setOpened(false)}
         title={
-          <Text fz={22} fw={700}>
+          <Text fz="xl" fw={700}>
             {member.name}
           </Text>
         }
         centered
         size="sm"
+        radius="lg"
+        padding="md"
       >
-        <Stack>
+        <Stack gap="lg">
           <SegmentedControl
             fullWidth
             value={action}
             onChange={setAction}
             data={[
               { label: 'Renew', value: 'renew' },
-              { label: 'Mark inactive', value: 'inactive' },
+              { label: 'Deactivate', value: 'inactive' },
             ]}
           />
 
           {isRenew ? (
             <>
-              <Group grow wrap="nowrap" gap="xs">
+              <SimpleGrid cols={3} spacing="sm">
                 <DatePickerInput
-                  label="From"
+                  label="Start date"
                   valueFormat="DD MMM YYYY"
                   value={from}
                   onChange={onFromChange}
+                  size="md"
+                  clearable={false}
                 />
+
                 <DatePickerInput
-                  label="To"
+                  label="End date"
                   valueFormat="DD MMM YYYY"
                   value={to}
                   onChange={setTo}
                   minDate={from ?? undefined}
+                  size="md"
+                  clearable={false}
                 />
-              </Group>
-              <Text size="sm" c="dimmed">
-                How was the payment received?
-              </Text>
-              <SegmentedControl
+
+                <TextInput
+                  label="Duration"
+                  value={`${months} ${months === 1 ? 'month' : 'months'}`}
+                  readOnly
+                  size="md"
+                  styles={{
+                    input: {
+                      fontWeight: 500,
+                    },
+                  }}
+                />
+              </SimpleGrid>
+
+              <Stack gap="xs">
+                <Text size="sm" fw={500}>
+                  Payment method
+                </Text>
+
+                <SegmentedControl
+                  fullWidth
+                  value={mode}
+                  onChange={setMode}
+                  data={[
+                    { label: 'UPI', value: 'UPI' },
+                    { label: 'Cash', value: 'Cash' },
+                  ]}
+                />
+              </Stack>
+
+              {mode === 'UPI' && <>{/* UPI QR image goes here */}</>}
+
+              <Button
                 fullWidth
-                value={mode}
-                onChange={setMode}
-                data={['UPI', 'Cash']}
-              />
-
-              {mode === 'UPI' && (
-                <>
-                  {/* UPI QR image goes here, e.g. <Image src="/upi-qr.png" w={200} mx="auto" /> */}
-                </>
-              )}
-
-              <Button disabled={!validRange} onClick={confirm}>
+                size="md"
+                radius="md"
+                disabled={!validRange}
+                onClick={confirm}
+              >
                 Confirm renewal
               </Button>
             </>
           ) : (
-            <>
-              <Text size="sm" c="dimmed">
-                {member.name} will be hidden from the member list and from
-                reminders. Their plan and payment history are kept.
+            <Stack gap="md">
+              <Text size="sm" c="dimmed" lh={1.5}>
+                Deactivating removes the member from the active member
+                list and payment reminders.
               </Text>
-              <Button color="red" onClick={confirm}>
-                Mark inactive
+
+              <Button
+                fullWidth
+                color="red"
+                size="md"
+                radius="md"
+                onClick={confirm}
+              >
+                Deactivate member
               </Button>
-            </>
+            </Stack>
           )}
         </Stack>
       </Modal>
