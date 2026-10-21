@@ -115,7 +115,6 @@ export default function CreateMemberButton() {
         <Stack gap="lg">
           <Stack gap="sm">
             <TextInput
-              label="Member name"
               placeholder="Enter full name"
               value={name}
               onChange={(event) => setName(event.currentTarget.value)}
@@ -124,7 +123,6 @@ export default function CreateMemberButton() {
             />
 
             <TextInput
-              label="Phone number"
               placeholder="Enter phone number"
               value={phone}
               onChange={(event) => setPhone(event.currentTarget.value)}

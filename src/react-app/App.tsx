@@ -1,5 +1,6 @@
 import '@mantine/core/styles.css';
-import { useCallback, useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState } from 'react';
+import { IconRefresh } from '@tabler/icons-react';
 import NewMember from './components/NewMember';
 import {
   Button,
@@ -15,6 +16,39 @@ import {
 import MemberList from './components/MemberList';
 import Login from './components/Login';
 import type { Member } from './types';
+
+function ReloadButton({
+  onRefresh,
+}: {
+  readonly onRefresh: () => Promise<void>;
+}) {
+  const [loading, setLoading] = useState(false);
+
+  const handleRefresh = async () => {
+    if (loading) return;
+
+    setLoading(true);
+    try {
+      await onRefresh();
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Button
+      variant="outline"
+      w={40}
+      h={36}
+      p={0}
+      aria-label="Refresh members"
+      loading={loading}
+      onClick={handleRefresh}
+    >
+      {!loading && <IconRefresh size={18} />}
+    </Button>
+  );
+}
 
 const theme = createTheme({
   fontSizes: {
@@ -32,13 +66,15 @@ function App() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
-  const lastLoaded = useRef(0);
 
-  // Check whether the owner has a valid session.
+  // Check authentication first whenever the application loads.
   useEffect(() => {
     let active = true;
 
-    fetch('/api/auth/me')
+    fetch('/api/auth/me', {
+      method: 'GET',
+      credentials: 'include',
+    })
       .then((response) => {
         if (active) {
           setAuthenticated(response.ok);
@@ -55,9 +91,13 @@ function App() {
     };
   }, []);
 
+  // Fetch the latest members without reloading the page.
   const loadMembers = useCallback(async () => {
     try {
-      const response = await fetch('/api/members');
+      const response = await fetch('/api/members', {
+        method: 'GET',
+        credentials: 'include',
+      });
 
       if (response.status === 401) {
         setAuthenticated(false);
@@ -69,9 +109,9 @@ function App() {
       }
 
       const data: Member[] = await response.json();
+
       setMembers(data);
       setError(false);
-      lastLoaded.current = Date.now();
     } catch {
       setError(true);
     } finally {
@@ -79,28 +119,13 @@ function App() {
     }
   }, []);
 
-  // Load members only after authentication succeeds.
+  // Fetch members only after authentication succeeds.
   useEffect(() => {
     if (authenticated !== true) return;
+
     void loadMembers();
-
-    const onVisible = () => {
-      if (
-        document.visibilityState === 'visible' &&
-        Date.now() - lastLoaded.current > 75_000
-      ) {
-        void loadMembers();
-      }
-    };
-
-    document.addEventListener('visibilitychange', onVisible);
-
-    return () => {
-      document.removeEventListener('visibilitychange', onVisible);
-    };
   }, [authenticated, loadMembers]);
 
-  // Determine what to display without nested ternaries.
   let content;
 
   if (authenticated === null) {
@@ -110,31 +135,28 @@ function App() {
   } else {
     content = (
       <>
-        {dueOnly ? (
-          <Group gap="sm">
-            <NewMember />
+        <Group gap="sm">
+          <NewMember />
+
+          {dueOnly ? (
             <Button variant="outline" onClick={() => setDueOnly(false)}>
               Go Back
             </Button>
-          </Group>
-        ) : (
-          <Group gap="sm">
-            <NewMember />
+          ) : (
             <Button variant="outline" onClick={() => setDueOnly(true)}>
               Payments Due
             </Button>
-          </Group>
-        )}
+          )}
+
+          <ReloadButton onRefresh={loadMembers} />
+        </Group>
 
         {!loaded && !error && <Text>Loading...</Text>}
 
         {error && (
-          <Stack align="center" gap="xs">
-            <Text c="red">Could not load members. Please try again.</Text>
-            <Button variant="subtle" onClick={() => void loadMembers()}>
-              Retry
-            </Button>
-          </Stack>
+          <Text c="red">
+            Could not load members. Click refresh to try again.
+          </Text>
         )}
 
         {loaded && !error && (
