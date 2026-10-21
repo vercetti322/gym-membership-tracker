@@ -135,7 +135,7 @@ export default function RenewButton({ member }: { readonly member: Member }) {
                   size="md"
                   clearable={false}
                   styles={{
-                    input: { fontSize: '10px' },
+                    input: { fontSize: '11px' },
                   }}
                 />
 
@@ -148,7 +148,7 @@ export default function RenewButton({ member }: { readonly member: Member }) {
                   size="md"
                   clearable={false}
                   styles={{
-                    input: { fontSize: '10px' },
+                    input: { fontSize: '11px' },
                   }}
                 />
 
@@ -159,7 +159,7 @@ export default function RenewButton({ member }: { readonly member: Member }) {
                   size="md"
                   styles={{
                     input: {
-                      fontSize: '10px',
+                      fontSize: '11px',
                       fontWeight: 500,
                     },
                   }}
