@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import {
   Button,
+  Image,
   Modal,
   SegmentedControl,
   SimpleGrid,
@@ -193,7 +194,16 @@ export default function CreateMemberButton({
             />
           </Stack>
 
-          {mode === 'UPI' && <>{/* UPI QR image goes here */}</>}
+          {mode === 'UPI' && (
+            <Image
+              src="/upi_qr.png"
+              alt="UPI payment QR code"
+              w={180}
+              h={180}
+              fit="contain"
+              mx="auto"
+            />
+          )}
 
           <Button
             fullWidth
