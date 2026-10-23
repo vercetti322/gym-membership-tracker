@@ -147,7 +147,7 @@ export default function CreateMemberButton({
               size="md"
               clearable={false}
               styles={{
-                input: { fontSize: '11px' },
+                input: { fontSize: '12px' },
               }}
             />
 
@@ -160,7 +160,7 @@ export default function CreateMemberButton({
               size="md"
               clearable={false}
               styles={{
-                input: { fontSize: '11px' },
+                input: { fontSize: '12px' },
               }}
             />
 
@@ -171,7 +171,7 @@ export default function CreateMemberButton({
               size="md"
               styles={{
                 input: {
-                  fontSize: '11px',
+                  fontSize: '12px',
                   fontWeight: 500,
                 },
               }}

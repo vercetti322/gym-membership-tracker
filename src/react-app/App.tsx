@@ -52,11 +52,11 @@ function ReloadButton({
 
 const theme = createTheme({
   fontSizes: {
-    xs: '0.5rem',
-    sm: '0.7rem',
-    md: '0.8rem',
-    lg: '0.9rem',
-    xl: '1rem',
+    xs: '0.6rem',
+    sm: '0.8rem',
+    md: '0.9rem',
+    lg: '1rem',
+    xl: '1.1rem',
   },
 });
 
