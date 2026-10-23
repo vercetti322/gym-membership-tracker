@@ -169,7 +169,7 @@ export default function RenewButton({
           </Text>
         }
         centered
-        size="sm"
+        size="500px"
         radius="lg"
         padding="md"
       >

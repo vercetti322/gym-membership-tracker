@@ -113,7 +113,7 @@ export default function CreateMemberButton({
           </Text>
         }
         centered
-        size="sm"
+        size="500px"
         radius="lg"
         padding="md"
       >
