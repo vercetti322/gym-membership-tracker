@@ -189,7 +189,12 @@ export default function MemberList({
   }, []);
 
   return (
-    <Stack w="100%" gap="sm" mih={560}>
+    <Stack
+      w="100%"
+      gap="sm"
+      mih={560}
+      pb="calc(env(safe-area-inset-bottom, 0px) + 2rem)"
+    >
       <TextInput
         placeholder="Search by name"
         value={query}
