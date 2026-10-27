@@ -183,14 +183,14 @@ function App() {
 
   return (
     <MantineProvider theme={theme}>
-      <Container size={380} px="md">
+      <Container size={365} px="md">
         <Stack align="center" gap="md" mih="100dvh" pt="xl">
           <Title order={1} ta="center" c="blue">
             Power Bull Gym
           </Title>
 
           <Text ta="center" w="100%" size="lg">
-            Track your gym members for due payments.
+            Manage your memberships and get payment reminders.
           </Text>
 
           {content}

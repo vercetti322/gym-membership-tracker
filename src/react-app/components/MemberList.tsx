@@ -20,7 +20,7 @@ import type { Member } from '../types';
 import { canRenew, plural, formatDate } from '../utils/MemberUtils';
 import RenewButton from './UpdatePlan';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 4;
 
 const status = (member: Member) => {
   const d = member.daysLeft;
