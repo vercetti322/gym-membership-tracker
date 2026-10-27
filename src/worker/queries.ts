@@ -3,6 +3,10 @@ export const GET_ALL_MEMBERS = `
     md.member_id AS id,
     md.name,
     md.phone,
+    CASE
+      WHEN md.photo_data IS NOT NULL THEN 1
+      ELSE 0
+    END AS hasPhoto,
     md.is_active AS isActive,
     mpa.plan_duration AS planMonths,
     mpa.end_date AS expiry,
@@ -31,7 +35,7 @@ export const GET_ALL_MEMBERS = `
       LIMIT 1
     )
   WHERE md.is_active = 1
-  ORDER BY md.name COLLATE NOCASE
+  ORDER BY md.member_id ASC
 `;
 
 export const GET_A_MEMBER = `
@@ -120,4 +124,16 @@ export const GET_SESSION_TOKEN = `
   SELECT id 
   FROM sessions
   WHERE id = ? AND expires_at > ?
+`;
+
+export const SAVE_MEMBER_PHOTO = `
+  UPDATE member_details
+  SET photo_data = ?
+  WHERE member_id = ? AND is_active = 1
+`;
+
+export const GET_MEMBER_PHOTO = `
+  SELECT photo_data
+  FROM member_details
+  WHERE member_id = ? AND is_active = 1
 `;

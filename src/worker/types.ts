@@ -2,6 +2,7 @@ export type MemberRow = {
   id: number;
   name: string;
   phone: string;
+  hasPhoto: number;
   isActive: number;
   planMonths: number | null;
   expiry: string | null;

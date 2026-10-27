@@ -5,6 +5,8 @@ import {
   renewMemberPlan,
   updateMemberDetails,
   getMember,
+  saveMemberPhoto,
+  getMemberPhoto,
 } from './service';
 import { login, logout, requireAuth } from './auth';
 
@@ -37,5 +39,11 @@ app.post('/api/members/:id/renewals', (c) => renewMemberPlan(c));
 
 // Mark a specific member inactive
 app.patch('/api/members/:id', (c) => updateMemberDetails(c));
+
+// Save a member photo
+app.put('/api/members/:id/photo', (c) => saveMemberPhoto(c));
+
+// get a member photo
+app.get('/api/members/:id/photo', (c) => getMemberPhoto(c));
 
 export default app;

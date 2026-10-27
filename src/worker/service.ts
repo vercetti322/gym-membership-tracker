@@ -4,7 +4,9 @@ import {
   RENEW_MEMBER_PLAN,
   GET_A_MEMBER,
   MARK_INACTIVE,
+  SAVE_MEMBER_PHOTO,
   INSERT_MEMBER,
+  GET_MEMBER_PHOTO,
   INSERT_MEMBER_PLAN,
 } from './queries';
 import { MemberRow } from './types';
@@ -15,6 +17,7 @@ export const getAllMembers = async (c: Context) => {
   return c.json(
     results.map((row: MemberRow) => ({
       ...row,
+      hasPhoto: row.hasPhoto === 1,
       paymentDone: row.paymentDone === 1,
       isActive: row.isActive === 1,
     })),
@@ -116,5 +119,81 @@ export const getMember = async (c: Context) => {
     ...result,
     paymentDone: result.paymentDone === 1,
     isActive: result.isActive === 1,
+  });
+};
+
+export const saveMemberPhoto = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return c.json({ error: 'Invalid Member ID' }, 400);
+  }
+
+  const contentType = c.req.header('content-type')?.trim().toLowerCase();
+
+  console.log('Received photo Content-Type:', contentType);
+
+  if (contentType !== 'image/jpeg') {
+    return c.json(
+      {
+        error: `Expected image/jpeg, received: ${contentType ?? 'missing'}`,
+      },
+      415,
+    );
+  }
+
+  const contentLength = Number(c.req.header('content-length'));
+
+  if (contentLength > 1024 * 1024) {
+    return c.json({ error: 'Photo exceeds the 1 MB limit' }, 413);
+  }
+
+  const photo = await c.req.arrayBuffer();
+
+  if (photo.byteLength === 0) {
+    return c.json({ error: 'Photo cannot be empty' }, 400);
+  }
+
+  if (photo.byteLength > 1024 * 1024) {
+    return c.json({ error: 'Photo exceeds the 1 MB limit' }, 413);
+  }
+
+  const result = await c.env.gym_tracker_db
+    .prepare(SAVE_MEMBER_PHOTO)
+    .bind(new Uint8Array(photo), id)
+    .run();
+
+  if (result.meta.changes === 0) {
+    return c.json({ error: 'Active member not found' }, 404);
+  }
+
+  return c.json({ message: 'Photo saved successfully' });
+};
+
+export const getMemberPhoto = async (c: Context) => {
+  const id = Number(c.req.param('id'));
+
+  if (!Number.isSafeInteger(id) || id <= 0) {
+    return c.json({ error: 'Invalid Member ID' }, 400);
+  }
+
+  const result = (await c.env.gym_tracker_db
+    .prepare(GET_MEMBER_PHOTO)
+    .bind(id)
+    .first()) as { photo_data: number[] | null } | null;
+
+  if (!result?.photo_data) {
+    return c.json({ error: 'Member photo not found' }, 404);
+  }
+
+  const bytes = new Uint8Array(result.photo_data);
+
+  return new Response(bytes, {
+    headers: {
+      'Content-Type': 'image/jpeg',
+      'Content-Length': String(bytes.byteLength),
+      'Cache-Control': 'private, no-store',
+      'X-Content-Type-Options': 'nosniff',
+    },
   });
 };
