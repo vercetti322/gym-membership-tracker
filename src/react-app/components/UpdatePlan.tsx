@@ -154,7 +154,7 @@ export default function RenewButton({
         events={{ hover: true, focus: true, touch: true }}
       >
         <div>
-          <Button size="xs" disabled={!enabled} onClick={open}>
+          <Button size="xs" fz="sm" disabled={!enabled} onClick={open}>
             Update
           </Button>
         </div>
@@ -195,7 +195,7 @@ export default function RenewButton({
                   size="md"
                   clearable={false}
                   styles={{
-                    input: { fontSize: '12px' },
+                    input: { fontSize: '13.9px' },
                   }}
                 />
 
@@ -208,7 +208,7 @@ export default function RenewButton({
                   size="md"
                   clearable={false}
                   styles={{
-                    input: { fontSize: '12px' },
+                    input: { fontSize: '13.9px' },
                   }}
                 />
 
@@ -219,7 +219,7 @@ export default function RenewButton({
                   size="md"
                   styles={{
                     input: {
-                      fontSize: '12px',
+                      fontSize: '13.9px',
                       fontWeight: 500,
                     },
                   }}

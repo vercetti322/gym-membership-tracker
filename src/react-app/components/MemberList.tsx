@@ -303,7 +303,7 @@ export default function MemberList({
                 borderRadius: 8,
                 background: 'var(--mantine-color-blue-6)',
                 color: 'white',
-                fontSize: 14,
+                fontSize: 16.2,
                 fontWeight: 600,
                 cursor: 'pointer',
               }}
@@ -378,7 +378,9 @@ export default function MemberList({
                     radius="50%"
                     color="gray"
                     variant="light"
-                    styles={{ placeholder: { fontSize: 24, fontWeight: 400 } }}
+                    styles={{
+                      placeholder: { fontSize: 27.7, fontWeight: 400 },
+                    }}
                   >
                     {!photoPreviews[m.id] && '+'}
                   </Avatar>
@@ -397,7 +399,7 @@ export default function MemberList({
                     <Badge
                       color={s.color}
                       variant="light"
-                      size="sm"
+                      size="md"
                       radius="sm"
                       px={4}
                       styles={{ root: { alignSelf: 'flex-start' } }}

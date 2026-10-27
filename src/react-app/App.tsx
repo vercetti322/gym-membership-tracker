@@ -12,6 +12,7 @@ import {
   Text,
   Title,
 } from '@mantine/core';
+import type { ButtonProps, MantineTheme } from '@mantine/core';
 
 import MemberList from './components/MemberList';
 import Login from './components/Login';
@@ -52,11 +53,20 @@ function ReloadButton({
 
 const theme = createTheme({
   fontSizes: {
-    xs: '0.6rem',
-    sm: '0.8rem',
-    md: '0.9rem',
-    lg: '1rem',
-    xl: '1.1rem',
+    xs: '0.69rem',
+    sm: '0.92rem',
+    md: '1.04rem',
+    lg: '1.16rem',
+    xl: '1.27rem',
+  },
+  components: {
+    Button: {
+      vars: (_theme: MantineTheme, { size }: ButtonProps) => ({
+        root: {
+          '--button-padding-x': `calc(var(--button-padding-x-${size ?? 'sm'}) * 0.8)`,
+        },
+      }),
+    },
   },
 });
 
@@ -173,7 +183,7 @@ function App() {
 
   return (
     <MantineProvider theme={theme}>
-      <Container size={350} px="md">
+      <Container size={380} px="md">
         <Stack align="center" gap="md" mih="100dvh" pt="xl">
           <Title order={1} ta="center" c="blue">
             Power Bull Gym
