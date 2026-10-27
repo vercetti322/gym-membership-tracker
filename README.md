@@ -8,6 +8,8 @@ A small, private dashboard for managing gym memberships and tracking plan renewa
 - Create members with a phone number, membership dates, and payment method.
 - Search and browse active members, and filter members whose plans are due or expired.
 - Renew plans or deactivate members; membership and payment history is retained.
+- Add or change member profile photos; images are resized and compressed before upload.
+- Display a UPI payment QR code when creating or renewing a membership.
 - Refresh member data without reloading the page.
 
 ## Stack
@@ -90,10 +92,13 @@ Login and logout are public endpoints. All other `/api/*` routes require a valid
 | `POST` | `/api/members` | Create a member and initial plan |
 | `POST` | `/api/members/:id/renewals` | Add a plan renewal |
 | `PATCH` | `/api/members/:id` | Deactivate a member |
+| `PUT` | `/api/members/:id/photo` | Save or replace a member photo |
+| `GET` | `/api/members/:id/photo` | Get a member photo |
 
 ## Data model
 
 - `member_details` stores each member and whether they are active.
+- `member_details.photo_data` stores an optional profile photo.
 - `member_plan_audit` stores plan and payment records; each renewal adds a record rather than overwriting history.
 - `sessions` stores expiring session-token hashes.
 
