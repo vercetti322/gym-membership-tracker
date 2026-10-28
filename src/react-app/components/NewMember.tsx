@@ -3,6 +3,7 @@ import {
   Button,
   Image,
   Modal,
+  NativeSelect,
   SegmentedControl,
   SimpleGrid,
   Stack,
@@ -12,24 +13,11 @@ import {
 import { DatePickerInput } from '@mantine/dates';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
-import dayjs from 'dayjs';
-
-const FORMAT = 'YYYY-MM-DD';
-
-const defaultTo = (from: string) =>
-  dayjs(from).add(1, 'month').subtract(1, 'day').format(FORMAT);
-
-const calculateMonths = (from: string | null, to: string | null) => {
-  if (!from || !to || dayjs(to).isBefore(from, 'day')) return 0;
-
-  const start = dayjs(from);
-  const end = dayjs(to);
-
-  const wholeMonths = end.diff(start, 'month');
-  const remainderDays = end.diff(start.add(wholeMonths, 'month'), 'day');
-
-  return wholeMonths + (remainderDays > 15 ? 1 : 0);
-};
+import {
+  getPlanEndDate,
+  getTodayDate,
+  planMonthOptions,
+} from '../utils/MemberUtils';
 
 export default function CreateMemberButton({
   onCreated,
@@ -41,31 +29,22 @@ export default function CreateMemberButton({
   const [phone, setPhone] = useState('');
   const [mode, setMode] = useState('UPI');
   const [from, setFrom] = useState<string | null>(null);
-  const [to, setTo] = useState<string | null>(null);
-
-  const months = calculateMonths(from, to);
-
-  const validRange =
-    from !== null && to !== null && dayjs(to).diff(dayjs(from), 'day') > 15;
+  const [months, setMonths] = useState(1);
+  const endDate = getPlanEndDate(from, months);
 
   const open = () => {
-    const start = dayjs().format(FORMAT);
+    const start = getTodayDate();
 
     setName('');
     setPhone('');
     setMode('UPI');
     setFrom(start);
-    setTo(defaultTo(start));
+    setMonths(1);
     setOpened(true);
   };
 
-  const onFromChange = (value: string | null) => {
-    setFrom(value);
-    if (value) setTo(defaultTo(value));
-  };
-
   const createMember = async () => {
-    if (!name.trim() || !phone.trim() || !from || !to || months <= 0) {
+    if (!name.trim() || !phone.trim() || !from || !endDate) {
       return;
     }
 
@@ -80,7 +59,7 @@ export default function CreateMemberButton({
           name: name.trim(),
           phone: phone.trim(),
           startDate: from,
-          endDate: to,
+          endDate,
           planDuration: months,
           paymentMode: mode,
         }),
@@ -140,12 +119,12 @@ export default function CreateMemberButton({
             />
           </Stack>
 
-          <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
+          <SimpleGrid cols={2} spacing="xs">
             <DatePickerInput
               label="Start date"
               valueFormat="DD MMM YYYY"
               value={from}
-              onChange={onFromChange}
+              onChange={setFrom}
               size="md"
               clearable={false}
               styles={{
@@ -153,30 +132,14 @@ export default function CreateMemberButton({
               }}
             />
 
-            <DatePickerInput
-              label="End date"
-              valueFormat="DD MMM YYYY"
-              value={to}
-              onChange={setTo}
-              minDate={from ?? undefined}
-              size="md"
-              clearable={false}
-              styles={{
-                input: { fontSize: '13.9px' },
+            <NativeSelect
+              label="Months"
+              data={planMonthOptions}
+              value={String(months)}
+              onChange={(event) => {
+                setMonths(Number(event.currentTarget.value));
               }}
-            />
-
-            <TextInput
-              label="Duration"
-              value={`${months} ${months === 1 ? 'month' : 'months'}`}
-              readOnly
               size="md"
-              styles={{
-                input: {
-                  fontSize: '13.9px',
-                  fontWeight: 500,
-                },
-              }}
             />
           </SimpleGrid>
 
@@ -218,7 +181,7 @@ export default function CreateMemberButton({
             disabled={
               !name.trim() ||
               !phone.trim() ||
-              !validRange ||
+              !endDate ||
               !/^\d{10}$/.test(phone)
             }
             onClick={createMember}

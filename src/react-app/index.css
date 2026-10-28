@@ -53,6 +53,11 @@ body {
   border-color: var(--app-primary) !important;
 }
 
+.mantine-NativeSelect-input:focus {
+  border-color: var(--app-primary) !important;
+  outline: none;
+}
+
 .mantine-Modal-content,
 .mantine-Modal-header,
 .mantine-Modal-body {

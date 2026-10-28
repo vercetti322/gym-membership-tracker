@@ -1,6 +1,23 @@
 import type { Member } from './../types';
 import dayjs from 'dayjs';
 
+const PLAN_DATE_FORMAT = 'YYYY-MM-DD';
+
+export const planMonthOptions = Array.from({ length: 12 }, (_, index) => {
+  const months = index + 1;
+  return {
+    value: String(months),
+    label: String(months),
+  };
+});
+
+export const getTodayDate = () => dayjs().format(PLAN_DATE_FORMAT);
+
+export const getPlanEndDate = (startDate: string | null, months: number) =>
+  startDate
+    ? dayjs(startDate).add(months, 'month').format(PLAN_DATE_FORMAT)
+    : null;
+
 export const plural = (n: number) => (n === 1 ? 'day' : 'days');
 
 export const getMemberStatus = (member: Member) => {
