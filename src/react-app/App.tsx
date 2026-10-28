@@ -262,8 +262,8 @@ function App() {
     <MantineProvider theme={theme} defaultColorScheme="dark">
       <Container size={365} px="md">
         <Stack align="center" gap="md" mih="100dvh" pt="xl">
-          <Title order={1} ta="center" className="app-title">
-            Power <span className="brand-accent">Bull</span> Gym
+          <Title order={1} ta="center" className="brand-accent">
+            Power Bull Gym
           </Title>
 
           <Text ta="center" w="100%" size="lg" c="dimmed">
