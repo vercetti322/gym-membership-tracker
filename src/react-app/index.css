@@ -1,8 +1,191 @@
 :root {
+  --app-background: #101d40;
+  --app-surface: #172746;
+  --app-input: #0f1e3a;
+  --app-primary: #2855e8;
+  --app-accent: #ff794f;
+  --app-text: #f3f6ff;
+  --app-muted: #aabbdd;
+  --app-border: #2a4167;
+  --app-danger: #ff737e;
+  --app-qr-background: #ffffff;
+  --status-active-text: #86efac;
+  --status-active-background: #164336;
+  --status-overdue-text: #ffffff;
+  --status-overdue-background: #b43a3a;
+  --status-neutral-text: #c1cee2;
+  --status-neutral-background: #293954;
+
+  color-scheme: dark;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--app-background) !important;
+  color: var(--app-text);
+}
+
+.app-title {
+  color: var(--app-text);
+}
+
+.brand-accent {
+  color: var(--app-accent);
+}
+
+.mantine-Input-input {
+  background-color: var(--app-input) !important;
+  border-color: var(--app-border) !important;
+  color: var(--app-text) !important;
+}
+
+.mantine-Input-input::placeholder {
+  color: var(--app-muted);
+  opacity: 0.8;
+}
+
+.mantine-Input-input:focus {
+  border-color: var(--app-primary) !important;
+}
+
+.mantine-Modal-content,
+.mantine-Modal-header,
+.mantine-Modal-body {
+  background-color: var(--app-surface);
+  color: var(--app-text);
+}
+
+.mantine-Modal-content {
+  border: 1px solid var(--app-border);
+  max-height: calc(100dvh - 32px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.mantine-Modal-header {
+  flex: 0 0 auto;
+}
+
+.mantine-Modal-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.mantine-Modal-title {
+  color: var(--app-text);
+}
+
+.mantine-Modal-close {
+  color: var(--app-muted);
+}
+
+.mantine-SegmentedControl-root {
+  background-color: var(--app-input) !important;
+  border: 1px solid var(--app-border) !important;
+}
+
+.mantine-Popover-dropdown {
+  max-width: calc(100vw - 24px) !important;
+  box-sizing: border-box;
+  border-color: var(--app-border) !important;
+  background-color: var(--app-surface) !important;
+  color: var(--app-text);
+}
+
+.photo-preview-modal {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.photo-preview-modal-body {
+  background: transparent !important;
+}
+
+.photo-change-button {
+  width: fit-content;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--app-accent);
+  color: var(--app-background);
+  font-size: 16.2px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.photo-change-button:hover {
+  background: var(--app-accent);
+}
+
+.mantine-Accordion-control {
+  color: var(--app-text);
+}
+
+.mantine-Accordion-control:hover {
+  background-color: rgba(42, 65, 103, 0.24);
+}
+
+.mantine-Pagination-control {
+  border-color: var(--app-border);
+  background-color: var(--app-surface);
+  color: var(--app-text);
+}
+
+.membership-status--green {
+  background-color: var(--status-active-background) !important;
+  color: var(--status-active-text) !important;
+}
+
+.membership-status--red {
+  background-color: var(--status-overdue-background) !important;
+  color: var(--status-overdue-text) !important;
+}
+
+.membership-status--gray {
+  background-color: var(--status-neutral-background) !important;
+  color: var(--status-neutral-text) !important;
+}
+
+.payment-qr {
+  padding: 8px;
+  border-radius: 8px;
+  background-color: var(--app-qr-background);
+}
+
+@media (max-width: 767px) {
+  .mantine-Modal-content {
+    max-height: calc(100dvh - 24px);
+  }
+}
+
+@media (max-width: 359px) {
+  .mantine-Popover-dropdown > div,
+  .mantine-Popover-dropdown .mantine-DatePickerInput-levelsGroup,
+  .mantine-Popover-dropdown .mantine-DatePickerInput-levelsGroup > div,
+  .mantine-Popover-dropdown .mantine-DatePickerInput-calendarHeader,
+  .mantine-Popover-dropdown .mantine-DatePickerInput-month {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  .mantine-Popover-dropdown .mantine-DatePickerInput-month {
+    table-layout: fixed;
+  }
+
+  .mantine-Popover-dropdown .mantine-DatePickerInput-day {
+    --day-size: 33px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
 }
 
 html {

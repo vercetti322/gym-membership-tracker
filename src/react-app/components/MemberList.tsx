@@ -17,25 +17,14 @@ import {
 } from '@mantine/core';
 import { useDebouncedValue } from '@mantine/hooks';
 import type { Member } from '../types';
-import { canRenew, plural, formatDate } from '../utils/MemberUtils';
+import {
+  canRenew,
+  formatDate,
+  getMemberStatus,
+} from '../utils/MemberUtils';
 import RenewButton from './UpdatePlan';
 
 const PAGE_SIZE = 4;
-
-const status = (member: Member) => {
-  const d = member.daysLeft;
-
-  if (d === null) return { text: 'No plan', color: 'gray' as const };
-
-  if (d < 0) {
-    const late = Math.abs(d);
-    return { text: `${late} ${plural(late)} late`, color: 'red' as const };
-  }
-
-  if (d === 0) return { text: 'Due today', color: 'red' as const };
-
-  return { text: `${d} ${plural(d)} left`, color: 'green' as const };
-};
 
 async function fetchMemberPhoto(id: number): Promise<string | null> {
   try {
@@ -247,6 +236,10 @@ export default function MemberList({
       />
 
       <Modal
+        classNames={{
+          content: 'photo-preview-modal',
+          body: 'photo-preview-modal-body',
+        }}
         opened={photoModalMemberId !== null}
         onClose={() => setPhotoModalMemberId(null)}
         withOverlay
@@ -301,17 +294,7 @@ export default function MemberList({
                 setSelectedMemberId(photoModalMemberId);
                 photoInputRef.current?.click();
               }}
-              style={{
-                width: '100%',
-                padding: '10px 16px',
-                border: 0,
-                borderRadius: 8,
-                background: 'var(--mantine-color-blue-6)',
-                color: 'white',
-                fontSize: 16.2,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
+              className="photo-change-button"
             >
               Change Photo
             </button>
@@ -326,19 +309,19 @@ export default function MemberList({
         onChange={setOpenId}
         styles={{
           item: {
-            border: '1px solid var(--mantine-color-gray-3)',
-            backgroundColor: 'transparent',
+            border: '1px solid var(--app-border)',
+            backgroundColor: 'var(--app-surface)',
           },
           control: {
-            backgroundColor: 'transparent',
+            backgroundColor: 'var(--app-surface)',
           },
           panel: {
-            backgroundColor: 'transparent',
+            backgroundColor: 'var(--app-surface)',
           },
         }}
       >
         {visible.map((m) => {
-          const s = status(m);
+          const s = getMemberStatus(m);
 
           let planLabel = 'No plan';
 
@@ -404,6 +387,7 @@ export default function MemberList({
                     <Badge
                       color={s.color}
                       variant="light"
+                      className={`membership-status membership-status--${s.color}`}
                       size="md"
                       radius="sm"
                       px={4}

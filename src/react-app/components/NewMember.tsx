@@ -102,7 +102,9 @@ export default function CreateMemberButton({
 
   return (
     <>
-      <Button onClick={open}>New Member</Button>
+      <Button color="orange" autoContrast onClick={open}>
+        New Member
+      </Button>
 
       <Modal
         opened={opened}
@@ -138,7 +140,7 @@ export default function CreateMemberButton({
             />
           </Stack>
 
-          <SimpleGrid cols={3} spacing="sm">
+          <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
             <DatePickerInput
               label="Start date"
               valueFormat="DD MMM YYYY"
@@ -184,6 +186,7 @@ export default function CreateMemberButton({
             </Text>
 
             <SegmentedControl
+              color="blue"
               fullWidth
               value={mode}
               onChange={setMode}
@@ -202,10 +205,13 @@ export default function CreateMemberButton({
               h={180}
               fit="contain"
               mx="auto"
+              className="payment-qr"
             />
           )}
 
           <Button
+            color="orange"
+            autoContrast
             fullWidth
             size="md"
             radius="md"

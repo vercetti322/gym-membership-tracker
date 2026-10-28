@@ -154,7 +154,15 @@ export default function RenewButton({
         events={{ hover: true, focus: true, touch: true }}
       >
         <div>
-          <Button size="xs" fz="sm" disabled={!enabled} onClick={open}>
+          <Button
+            color="blue"
+            autoContrast
+            size="sm"
+            fz="sm"
+            h={40}
+            disabled={!enabled}
+            onClick={open}
+          >
             Update
           </Button>
         </div>
@@ -173,8 +181,9 @@ export default function RenewButton({
         radius="lg"
         padding="md"
       >
-        <Stack gap="lg">
+        <Stack gap="md">
           <SegmentedControl
+            color="blue"
             fullWidth
             value={action}
             onChange={setAction}
@@ -186,7 +195,7 @@ export default function RenewButton({
 
           {isRenew ? (
             <>
-              <SimpleGrid cols={3} spacing="sm">
+              <SimpleGrid cols={{ base: 2, sm: 3 }} spacing="xs">
                 <DatePickerInput
                   label="Start date"
                   valueFormat="DD MMM YYYY"
@@ -232,6 +241,7 @@ export default function RenewButton({
                 </Text>
 
                 <SegmentedControl
+                  color="blue"
                   fullWidth
                   value={mode}
                   onChange={setMode}
@@ -250,10 +260,13 @@ export default function RenewButton({
                   h={180}
                   fit="contain"
                   mx="auto"
+                  className="payment-qr"
                 />
               )}
 
               <Button
+                color="orange"
+                autoContrast
                 fullWidth
                 size="md"
                 radius="md"
@@ -273,6 +286,7 @@ export default function RenewButton({
               <Button
                 fullWidth
                 color="red"
+                variant="outline"
                 size="md"
                 radius="md"
                 onClick={confirm}

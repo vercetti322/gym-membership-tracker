@@ -52,6 +52,83 @@ function ReloadButton({
 }
 
 const theme = createTheme({
+  colors: {
+    blue: [
+      '#E9EFFF',
+      '#D5DFFF',
+      '#ADC0FF',
+      '#85A0FF',
+      '#5D7FFF',
+      '#3C65F4',
+      '#2855E8',
+      '#2147C4',
+      '#1A399D',
+      '#122A73',
+    ],
+    orange: [
+      '#FFF0EB',
+      '#FFDED4',
+      '#FFC2B0',
+      '#FFA68C',
+      '#FF8E6C',
+      '#FF825E',
+      '#FF794F',
+      '#E85E39',
+      '#C94729',
+      '#A3321B',
+    ],
+    gray: [
+      '#E1E9F7',
+      '#C9D6ED',
+      '#AABBDD',
+      '#8EA4CA',
+      '#7188AD',
+      '#5B7297',
+      '#475D80',
+      '#344B70',
+      '#273D60',
+      '#192F50',
+    ],
+    dark: [
+      '#F3F6FF',
+      '#DCE5F8',
+      '#AABBDD',
+      '#8298BE',
+      '#617AA5',
+      '#40577F',
+      '#2A4167',
+      '#172746',
+      '#0F1E3A',
+      '#101D40',
+    ],
+    green: [
+      '#E9FFF5',
+      '#C8F8E1',
+      '#A5F0CC',
+      '#7DE5B5',
+      '#62DBA5',
+      '#55D69E',
+      '#36BB81',
+      '#259967',
+      '#18764F',
+      '#0D5639',
+    ],
+    red: [
+      '#FFF0F1',
+      '#FFDEE1',
+      '#FFC3C8',
+      '#FFA2AA',
+      '#FF858F',
+      '#FF737E',
+      '#EA5D69',
+      '#C94754',
+      '#A83541',
+      '#862630',
+    ],
+  },
+  primaryColor: 'blue',
+  primaryShade: 6,
+  defaultRadius: 'md',
   fontSizes: {
     xs: '0.69rem',
     sm: '0.92rem',
@@ -182,14 +259,14 @@ function App() {
   }
 
   return (
-    <MantineProvider theme={theme}>
+    <MantineProvider theme={theme} defaultColorScheme="dark">
       <Container size={365} px="md">
         <Stack align="center" gap="md" mih="100dvh" pt="xl">
-          <Title order={1} ta="center" c="blue">
-            Power Bull Gym
+          <Title order={1} ta="center" className="app-title">
+            Power <span className="brand-accent">Bull</span> Gym
           </Title>
 
-          <Text ta="center" w="100%" size="lg">
+          <Text ta="center" w="100%" size="lg" c="dimmed">
             Manage your memberships and get payment reminders.
           </Text>
 
