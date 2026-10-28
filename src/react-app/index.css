@@ -30,10 +30,6 @@ body {
   color: var(--app-text);
 }
 
-.app-title {
-  color: var(--app-text);
-}
-
 .brand-accent {
   color: var(--app-accent);
 }
@@ -51,11 +47,6 @@ body {
 
 .mantine-Input-input:focus {
   border-color: var(--app-primary) !important;
-}
-
-.mantine-NativeSelect-input:focus {
-  border-color: var(--app-primary) !important;
-  outline: none;
 }
 
 .mantine-Modal-content,

@@ -3,7 +3,7 @@ import {
   Button,
   Image,
   Modal,
-  NativeSelect,
+  Select,
   SegmentedControl,
   SimpleGrid,
   Stack,
@@ -132,13 +132,13 @@ export default function CreateMemberButton({
               }}
             />
 
-            <NativeSelect
+            <Select
               label="Months"
               data={planMonthOptions}
               value={String(months)}
-              onChange={(event) => {
-                setMonths(Number(event.currentTarget.value));
-              }}
+              onChange={(value) => value && setMonths(Number(value))}
+              comboboxProps={{ width: 'target' }}
+              allowDeselect={false}
               size="md"
             />
           </SimpleGrid>
