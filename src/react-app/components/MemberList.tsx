@@ -76,6 +76,7 @@ export default function MemberList({
   readonly onMemberUpdated: () => Promise<void>;
 }) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const accordionItemRefs = useRef<Record<string, HTMLDivElement | null>>({});
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(query, 300);
   const photoInputRef = useRef<HTMLInputElement>(null);
@@ -99,6 +100,21 @@ export default function MemberList({
   const onSearch = (value: string) => {
     setQuery(value);
     setOpenId(null);
+  };
+
+  const keepExpandedItemInView = (id: string) => {
+    if (openId !== id) return;
+
+    const item = accordionItemRefs.current[id];
+    if (!item) return;
+
+    const bottomMargin = 16;
+    const overflow = item.getBoundingClientRect().bottom -
+      (window.innerHeight - bottomMargin);
+
+    if (overflow > 0) {
+      window.scrollBy({ top: overflow, behavior: 'smooth' });
+    }
   };
 
   const saveMemberPhoto = async (memberId: number, photo: Blob) => {
@@ -322,7 +338,17 @@ export default function MemberList({
           }
 
           return (
-            <Accordion.Item key={m.id} value={String(m.id)}>
+            <Accordion.Item
+              key={m.id}
+              value={String(m.id)}
+              ref={(element) => {
+                if (element) {
+                  accordionItemRefs.current[String(m.id)] = element;
+                } else {
+                  delete accordionItemRefs.current[String(m.id)];
+                }
+              }}
+            >
               <Group wrap="nowrap" gap={0} px="sm">
                 <ActionIcon
                   variant="subtle"
@@ -393,7 +419,11 @@ export default function MemberList({
                 </Group>
               </Group>
 
-              <Accordion.Panel>
+              <Accordion.Panel
+                onTransitionEnd={() =>
+                  keepExpandedItemInView(String(m.id))
+                }
+              >
                 <Stack gap="lg" pt="sm">
                   <SimpleGrid cols={2} spacing="md">
                     <Stack gap={6} style={{ minWidth: 0 }}>
