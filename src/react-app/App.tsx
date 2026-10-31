@@ -151,6 +151,7 @@ function App() {
   const [authenticated, setAuthenticated] = useState<boolean | null>(null);
   const [dueOnly, setDueOnly] = useState(false);
   const [members, setMembers] = useState<Member[]>([]);
+  const [photoRefreshKey, setPhotoRefreshKey] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState(false);
 
@@ -184,6 +185,7 @@ function App() {
       const response = await fetch('/api/members', {
         method: 'GET',
         credentials: 'include',
+        cache: 'no-store',
       });
 
       if (response.status === 401) {
@@ -198,6 +200,7 @@ function App() {
       const data: Member[] = await response.json();
 
       setMembers(data);
+      setPhotoRefreshKey((key) => key + 1);
       setError(false);
     } catch {
       setError(true);
@@ -251,6 +254,7 @@ function App() {
             key={dueOnly ? 'due' : 'all'}
             dueOnly={dueOnly}
             members={members}
+            photoRefreshKey={photoRefreshKey}
             onMemberUpdated={loadMembers}
           />
         )}

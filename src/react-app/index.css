@@ -130,12 +130,6 @@ body {
   background-color: rgba(42, 65, 103, 0.24);
 }
 
-.mantine-Pagination-control {
-  border-color: var(--app-border);
-  background-color: var(--app-surface);
-  color: var(--app-text);
-}
-
 .membership-status--green {
   background-color: var(--status-active-background) !important;
   color: var(--status-active-text) !important;

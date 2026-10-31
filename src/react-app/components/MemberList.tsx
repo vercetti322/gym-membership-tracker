@@ -7,7 +7,6 @@ import {
   ActionIcon,
   Group,
   Badge,
-  Pagination,
   Box,
   SimpleGrid,
   Stack,
@@ -24,12 +23,11 @@ import {
 } from '../utils/MemberUtils';
 import RenewButton from './UpdatePlan';
 
-const PAGE_SIZE = 4;
-
 async function fetchMemberPhoto(id: number): Promise<string | null> {
   try {
     const response = await fetch(`/api/members/${id}/photo`, {
       credentials: 'include',
+      cache: 'no-store',
     });
 
     if (!response.ok) return null;
@@ -47,29 +45,36 @@ async function loadMemberPhotos(
 ): Promise<void> {
   if (isCancelled() || members.length === 0) return;
 
-  const [member, ...remaining] = members;
-  const url = await fetchMemberPhoto(member.id);
+  const photos = await Promise.all(
+    members.map(async (member) => ({
+      id: member.id,
+      url: await fetchMemberPhoto(member.id),
+    })),
+  );
 
   if (isCancelled()) {
-    if (url) URL.revokeObjectURL(url);
+    photos.forEach(({ url }) => {
+      if (url) URL.revokeObjectURL(url);
+    });
     return;
   }
 
-  if (url) onPhotoLoaded(member.id, url);
-
-  await loadMemberPhotos(remaining, onPhotoLoaded, isCancelled);
+  photos.forEach(({ id, url }) => {
+    if (url) onPhotoLoaded(id, url);
+  });
 }
 
 export default function MemberList({
   dueOnly,
   members,
+  photoRefreshKey,
   onMemberUpdated,
 }: {
   readonly dueOnly: boolean;
   readonly members: Member[];
+  readonly photoRefreshKey: number;
   readonly onMemberUpdated: () => Promise<void>;
 }) {
-  const [page, setPage] = useState(1);
   const [openId, setOpenId] = useState<string | null>(null);
   const [query, setQuery] = useState('');
   const [debouncedQuery] = useDebouncedValue(query, 300);
@@ -91,22 +96,8 @@ export default function MemberList({
   // Display members in ascending ID order.
   const sorted = [...filtered].sort((a, b) => a.id - b.id);
 
-  const pages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
-  const currentPage = Math.min(page, pages);
-
-  const visible = sorted.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
-
-  const goTo = (p: number) => {
-    setPage(p);
-    setOpenId(null);
-  };
-
   const onSearch = (value: string) => {
     setQuery(value);
-    setPage(1);
     setOpenId(null);
   };
 
@@ -157,7 +148,7 @@ export default function MemberList({
     return () => {
       cancelled = true;
     };
-  }, [members, updatePhotoPreview]);
+  }, [members, photoRefreshKey, updatePhotoPreview]);
 
   useEffect(() => {
     if (cleanupTimerRef.current !== null) {
@@ -190,7 +181,7 @@ export default function MemberList({
         onChange={(e) => onSearch(e.currentTarget.value)}
       />
 
-      {visible.length === 0 && (
+      {sorted.length === 0 && (
         <Text ta="center" c="dimmed">
           {dueOnly ? 'No pending payments' : 'No members found'}
         </Text>
@@ -320,7 +311,7 @@ export default function MemberList({
           },
         }}
       >
-        {visible.map((m) => {
+        {sorted.map((m) => {
           const s = getMemberStatus(m);
 
           let planLabel = 'No plan';
@@ -466,15 +457,6 @@ export default function MemberList({
           );
         })}
       </Accordion>
-
-      <Group justify="center" mt="xs">
-        <Pagination
-          total={pages}
-          value={currentPage}
-          onChange={goTo}
-          size="sm"
-        />
-      </Group>
     </Stack>
   );
 }

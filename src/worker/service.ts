@@ -13,6 +13,7 @@ import { MemberRow } from './types';
 
 export const getAllMembers = async (c: Context) => {
   const { results } = await c.env.gym_tracker_db.prepare(GET_ALL_MEMBERS).all();
+  c.header('Cache-Control', 'no-store');
 
   return c.json(
     results.map((row: MemberRow) => ({
